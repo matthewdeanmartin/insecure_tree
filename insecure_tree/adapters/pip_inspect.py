@@ -6,7 +6,6 @@ import json
 import logging
 import shutil
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 from packaging.requirements import Requirement
@@ -15,7 +14,7 @@ from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
 from insecure_tree.marker_eval import default_env, evaluate_marker
 from insecure_tree.models import DependencyGraph, GraphEdge, PackageNode, SourceAdapter
 from insecure_tree.normalize import canonicalize
-from insecure_tree.subprocess import SubprocessError, run_subprocess
+from insecure_tree.subprocess import SubprocessError
 
 log = logging.getLogger(__name__)
 
