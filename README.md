@@ -71,14 +71,14 @@ failure.
 
 ## All commands
 
-| Command                             | Description                                                 |
+| Command | Description |
 |-------------------------------------|-------------------------------------------------------------|
-| `insecure-tree scan`                | Run the full audit pipeline                                 |
-| `insecure-tree graph`               | Emit the dependency graph as JSON or text                   |
-| `insecure-tree metadata PACKAGE`    | Inspect PyPI metadata and GitHub candidates for one package |
-| `insecure-tree report --input FILE` | Re-render a report from a saved JSON file                   |
-| `insecure-tree cache dir`           | Print the cache directory path                              |
-| `insecure-tree cache clean`         | Remove expired cache entries                                |
+| `insecure-tree scan` | Run the full audit pipeline |
+| `insecure-tree graph` | Emit the dependency graph as JSON or text |
+| `insecure-tree metadata PACKAGE` | Inspect PyPI metadata and GitHub candidates for one package |
+| `insecure-tree report --input FILE` | Re-render a report from a saved JSON file |
+| `insecure-tree cache dir` | Print the cache directory path |
+| `insecure-tree cache clean` | Remove expired cache entries |
 
 ## Configuration
 
