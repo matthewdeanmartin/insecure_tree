@@ -1,5 +1,4 @@
 """Tests for text report generation."""
-from pathlib import Path
 
 from insecure_tree.models import PackageNode, Report, ReportSummary, ScanResult, ScanStatus
 from insecure_tree.report.text import write_text
