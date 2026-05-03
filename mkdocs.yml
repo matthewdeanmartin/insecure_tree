@@ -1,0 +1,37 @@
+---
+site_name: insecure_tree
+site_url: https://insecure_tree.readthedocs.io/
+site_author: Matthew Martin <matthewdeanmartin@gmail.com>
+site_description: Find zizmor flaws in your dependency tree
+repo_url: https://github.com/matthewdeanmartin/insecure_tree
+theme:
+  name: readthedocs
+  features: [navigation.footer]
+edit_uri: edit/main/docs/
+markdown_extensions:
+  - attr_list
+  - codehilite
+  - toc:
+      permalink: true
+nav:
+  - Overview:
+      - Readme.md: overview/README.md
+  - Installation: installation.md
+  - Usage:
+      - Quick Start: usage/quickstart.md
+  - Contributing: extending/CONTRIBUTING.md
+  - Change Log: CHANGELOG.md
+validation:
+  nav:
+    omitted_files: warn
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google

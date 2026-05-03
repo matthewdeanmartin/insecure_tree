@@ -1,0 +1,211 @@
+[project]
+name = "insecure_tree"
+version = "0.1.0"
+description = "Find zizmor flaws in your dependency tree"
+readme = "README.md"
+authors = [{ name = "Matthew Martin", email = "matthewdeanmartin@gmail.com" }]
+keywords = ["insecure_tree"]
+license = "MIT"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "packaging>=23.0",
+    "httpx>=0.27",
+    "jinja2>=3.1",
+    "rich>=13.0",
+    "tomli>=2.0; python_version < '3.11'",
+    "zizmor>=1.0",
+]
+
+[project.urls]
+Repository = "https://github.com/matthewdeanmartin/insecure_tree"
+Documentation = "https://insecure_tree.readthedocs.io/en/latest/"
+Changelog = "https://github.com/matthewdeanmartin/insecure_tree/blob/main/CHANGELOG.md"
+homepage = "https://github.com/matthewdeanmartin/insecure_tree"
+issues = "https://github.com/matthewdeanmartin/insecure_tree/issues/"
+
+[project.scripts]
+insecure-tree = "insecure_tree.cli:main"
+insecure_tree = "insecure_tree.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["insecure_tree"]
+include = [
+    "insecure_tree/**/*.py",
+    "insecure_tree/py.typed",
+    "/README.md",
+    "LICENSE",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["/README.md", "LICENSE", "/insecure_tree", "/tests"]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "black>=26.0.0",
+    "isort>=6.0.0",
+    "jiggle-version>=2.1.0",
+    "codespell>=2.4.1",
+    "mdformat>=1.0.0",
+    "metametameta>=0.1.5",
+    "mypy>=1.18.0",
+    "pylint[spelling]>=4.0.0",
+    "pytest>=8.4.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.5.0",
+    "pytest-randomly>=3.15.0",
+    "pytest-sugar>=0.9.7",
+    "pytest-mock>=3.14.0",
+    "pytest-timeout>=2.4.0",
+    "hypothesis>=6.100.0",
+    "ruff>=0.12.0",
+    "troml-dev-status>=0.6.0",
+    "pre-commit>=4.0.0",
+    "pip-audit>=2.7.0",
+    "tox>=4.0",
+    "tox-uv>=1.0",
+    "gha-update>=0.1.0; python_version >= '3.12'",
+    "pyyaml>=6.0",
+    "yamlfix>=1.19.0",
+    "interrogate>=1.5.0",
+    "linkcheckmd>=1.4.0",
+    "pyenchant>=3.2.2",
+    "mkdocs>=1.6.0",
+    "mkdocstrings[python]>=0.26.0",
+    "git2md>=0.1.0",
+    "pyclean>=3.0.0",
+    # dead code analysis (advisory)
+    "vulture>=2.11",
+    "deadcode>=2.4.0",
+    # API surface / doc checks
+    "griffe>=1.0.0",
+    "pydoclint>=0.8.0; python_version >= '3.10'",
+    "pydoctest==0.2.1",
+    # advisory / exploratory tools (standalone make targets, not quality gates)
+    "refurb>=2.0.0; python_version >= '3.10'",
+    "crosshair-tool>=0.0.80; python_version >= '3.10'",
+    "deptry>=0.20.0",
+    "import-linter>=2.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+addopts = "-q --timeout=60"
+norecursedirs = ["vendor", "scripts", "dist", "build"]
+markers = [
+    "slow: performance benchmarks (run with -m slow)",
+    "integration: integration tests (run with -m integration)",
+]
+junit_family = "xunit1"
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+py_version = 39
+skip_gitignore = true
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+packages = ["insecure_tree", "tests"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "B",   # bugbear
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "RUF", # ruff-specific
+    "W",   # pycodestyle warnings
+]
+ignore = [
+    "E501",   # line too long (black handles this)
+    "UP007",  # use X | Y for union (3.9 compat)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["B011", "S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "if self\\.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "except ImportError",
+    "except ModuleNotFoundError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]
+
+# import-linter: define architectural contracts here when you're ready.
+# Run `make import-linter` to check them.
+# See: https://import-linter.readthedocs.io/
+[tool.importlinter]
+root_packages = ["insecure_tree"]
+# [[tool.importlinter.contracts]]
+# name = "insecure_tree does not import from tests"
+# type = "forbidden"
+# source_modules = ["insecure_tree"]
+# forbidden_modules = ["tests"]

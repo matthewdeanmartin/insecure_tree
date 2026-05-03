@@ -1,0 +1,116 @@
+# GitLab-style CI pipeline using uv. All bash is inlined via scripts/.
+# Run locally with: bitrab -c .bitrab-ci.yml run
+
+image: python:3.11-slim
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  UV_LINK_MODE: copy
+  UV_PROJECT_ENVIRONMENT: .venv
+  UV_CACHE_DIR: .uv
+  PACKAGE_DIR: insecure_tree
+
+stages:
+  - test
+  - security
+  - docs
+  - build
+  - release
+
+cache:
+  key:
+    files:
+      - pyproject.toml
+      - uv.lock
+  paths:
+    - .venv/
+    - .uv/
+
+# ── TEST STAGE ────────────────────────────────────────────────────────────────
+
+lint:
+  stage: test
+  script: >-
+    ./.bitrab-ci-scripts/lint.sh
+  allow_failure: false
+
+mypy:
+  stage: test
+  script: >-
+    ./.bitrab-ci-scripts/mypy.sh
+
+precommit:
+  stage: test
+  script: >-
+    ./.bitrab-ci-scripts/precommit.sh
+
+pytest:
+  stage: test
+  needs: ["lint"]
+  script: >-
+    ./.bitrab-ci-scripts/pytest.sh
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - htmlcov/
+      - coverage.xml
+
+smoke:
+  stage: test
+  needs: ["pytest"]
+  script: >-
+    ./.bitrab-ci-scripts/smoke.sh
+
+# ── SECURITY STAGE ───────────────────────────────────────────────────────────
+
+bandit:
+  stage: security
+  script: >-
+    ./.bitrab-ci-scripts/bandit.sh
+
+audit:
+  stage: security
+  script: >-
+    ./.bitrab-ci-scripts/audit.sh
+
+# ── DOCS STAGE ───────────────────────────────────────────────────────────────
+
+check_docs:
+  stage: docs
+  script: >-
+    ./.bitrab-ci-scripts/check_docs.sh
+
+build_docs:
+  stage: docs
+  script: >-
+    ./.bitrab-ci-scripts/build_docs.sh
+  artifacts:
+    paths:
+      - site/
+
+# ── BUILD STAGE ───────────────────────────────────────────────────────────────
+
+build_package:
+  stage: build
+  script: >-
+    ./.bitrab-ci-scripts/build_package.sh
+  artifacts:
+    paths:
+      - dist/
+
+# ── RELEASE STAGE (manual) ───────────────────────────────────────────────────
+
+publish_pypi:
+  stage: release
+  needs: ["build_package"]
+  rules:
+    - if: "$CI_COMMIT_TAG"
+      when: manual
+    - when: never
+  script: >-
+    ./.bitrab-ci-scripts/publish_pypi.sh
