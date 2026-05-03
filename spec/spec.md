@@ -10,29 +10,37 @@ The tool is intended for developer workstations and CI jobs. It is not a vulnera
 
 ## 2. Goals
 
-* Build a dependency graph for a Python project or environment.
-* Support dependency graphs from:
+- Build a dependency graph for a Python project or environment.
 
-  * `uv` project mode.
-  * `uv pip` environment mode.
-  * Generic installed-environment mode using `pip inspect` plus local metadata parsing.
-  * Optional external adapters such as `pipdeptree` when available.
-* Fetch package metadata from PyPI-compatible JSON APIs.
-* Identify packages that claim a GitHub repository in package metadata.
-* Clone or fetch the claimed GitHub repositories safely.
-* Run `zizmor` against the repositories’ GitHub Actions workflows.
-* Produce deterministic text and HTML reports.
-* Cache metadata, repository checkouts, and scan results.
-* Make false positives and provenance ambiguity obvious in the report.
+- Support dependency graphs from:
+
+  - `uv` project mode.
+  - `uv pip` environment mode.
+  - Generic installed-environment mode using `pip inspect` plus local metadata parsing.
+  - Optional external adapters such as `pipdeptree` when available.
+
+- Fetch package metadata from PyPI-compatible JSON APIs.
+
+- Identify packages that claim a GitHub repository in package metadata.
+
+- Clone or fetch the claimed GitHub repositories safely.
+
+- Run `zizmor` against the repositories’ GitHub Actions workflows.
+
+- Produce deterministic text and HTML reports.
+
+- Cache metadata, repository checkouts, and scan results.
+
+- Make false positives and provenance ambiguity obvious in the report.
 
 ## 3. Non-goals
 
-* Do not execute dependency package code.
-* Do not install project dependencies unless explicitly requested by a future command.
-* Do not judge whether PyPI metadata is truthful; only report claimed repositories and confidence.
-* Do not scan non-GitHub CI systems in v1.
-* Do not open pull requests or issues in upstream repositories in v1.
-* Do not require GitHub authentication for public repositories, though authentication should be supported for rate-limit relief and private/internal dependency graphs.
+- Do not execute dependency package code.
+- Do not install project dependencies unless explicitly requested by a future command.
+- Do not judge whether PyPI metadata is truthful; only report claimed repositories and confidence.
+- Do not scan non-GitHub CI systems in v1.
+- Do not open pull requests or issues in upstream repositories in v1.
+- Do not require GitHub authentication for public repositories, though authentication should be supported for rate-limit relief and private/internal dependency graphs.
 
 ## 4. CLI shape
 
@@ -57,11 +65,11 @@ insecure-tree scan \
 `scan` runs the full pipeline:
 
 1. Discover dependency graph.
-2. Resolve package metadata.
-3. Extract GitHub repo candidates.
-4. Fetch workflows.
-5. Run `zizmor`.
-6. Write reports.
+1. Resolve package metadata.
+1. Extract GitHub repo candidates.
+1. Fetch workflows.
+1. Run `zizmor`.
+1. Write reports.
 
 ### 4.2 Dependency source options
 
@@ -81,19 +89,25 @@ insecure-tree scan \
 
 Recommended behavior:
 
-* `auto`: detect in order:
+- `auto`: detect in order:
 
   1. `uv.lock` + `pyproject.toml` → `uv` adapter.
-  2. Active or specified Python environment with `uv pip tree` available → `uv-pip` adapter.
-  3. Active or specified Python environment with `pip inspect` available → `pip-inspect` adapter.
-  4. `pipdeptree` available → `pipdeptree` adapter.
-  5. `requirements*.txt` → `requirements` adapter.
-* `uv`: use `uv tree --output-format json` when available.
-* `uv-pip`: use `uv pip tree --output-format json` when available.
-* `pip-inspect`: use `python -m pip inspect` and derive graph edges from each distribution’s `requires_dist` metadata.
-* `pipdeptree`: use `pipdeptree --json-tree` or equivalent.
-* `requirements`: resolve package metadata for pinned or unpinned top-level requirements, but mark graph as incomplete unless lock data is also supplied.
-* `json`: consume a previously generated `insecure-tree graph --format json` file.
+  1. Active or specified Python environment with `uv pip tree` available → `uv-pip` adapter.
+  1. Active or specified Python environment with `pip inspect` available → `pip-inspect` adapter.
+  1. `pipdeptree` available → `pipdeptree` adapter.
+  1. `requirements*.txt` → `requirements` adapter.
+
+- `uv`: use `uv tree --output-format json` when available.
+
+- `uv-pip`: use `uv pip tree --output-format json` when available.
+
+- `pip-inspect`: use `python -m pip inspect` and derive graph edges from each distribution’s `requires_dist` metadata.
+
+- `pipdeptree`: use `pipdeptree --json-tree` or equivalent.
+
+- `requirements`: resolve package metadata for pinned or unpinned top-level requirements, but mark graph as incomplete unless lock data is also supplied.
+
+- `json`: consume a previously generated `insecure-tree graph --format json` file.
 
 ## 5. Answer to “does pip have a native tree?”
 
@@ -103,9 +117,9 @@ Modern pip provides `pip inspect`, which emits a stable JSON report of installed
 
 So v1 should treat pip support as:
 
-* Metadata source: native `pip inspect`.
-* Tree reconstruction: implemented by `insecure-tree`.
-* Optional compatibility path: `pipdeptree` adapter when installed.
+- Metadata source: native `pip inspect`.
+- Tree reconstruction: implemented by `insecure-tree`.
+- Optional compatibility path: `pipdeptree` adapter when installed.
 
 ## 6. Data model
 
@@ -167,10 +181,10 @@ So v1 should treat pip support as:
 
 Confidence levels:
 
-* `high`: explicit source/repository/changelog/docs field pointing to GitHub project root.
-* `medium`: homepage points to GitHub project root.
-* `low`: GitHub URL found in description or miscellaneous URL field.
-* `rejected`: GitHub URL is issue, pull request, release asset, user profile, organization page, gist, or docs-only URL.
+- `high`: explicit source/repository/changelog/docs field pointing to GitHub project root.
+- `medium`: homepage points to GitHub project root.
+- `low`: GitHub URL found in description or miscellaneous URL field.
+- `rejected`: GitHub URL is issue, pull request, release asset, user profile, organization page, gist, or docs-only URL.
 
 ### 6.4 Scan result
 
@@ -209,38 +223,38 @@ Confidence levels:
 Resolution order:
 
 1. Local installed distribution metadata from `pip inspect` or importlib metadata.
-2. PyPI JSON API for exact package version.
-3. PyPI JSON API latest release fallback, only if exact version unavailable.
-4. User-provided metadata override file.
+1. PyPI JSON API for exact package version.
+1. PyPI JSON API latest release fallback, only if exact version unavailable.
+1. User-provided metadata override file.
 
 ### 7.2 Fields to inspect for GitHub URLs
 
 Inspect at least:
 
-* `project_url` / `project_urls`
-* `home_page`
-* `download_url`
-* `docs_url`, with lower confidence
-* `description`, with lower confidence
-* `direct_url` for direct VCS installs
+- `project_url` / `project_urls`
+- `home_page`
+- `download_url`
+- `docs_url`, with lower confidence
+- `description`, with lower confidence
+- `direct_url` for direct VCS installs
 
 Preferred labels:
 
-* `Source`
-* `Source Code`
-* `Repository`
-* `Homepage`
-* `Code`
-* `GitHub`
+- `Source`
+- `Source Code`
+- `Repository`
+- `Homepage`
+- `Code`
+- `GitHub`
 
 Reject labels likely to be non-source:
 
-* `Bug Tracker`
-* `Issues`
-* `CI`
-* `Documentation`, unless no better candidate exists
-* `Funding`
-* `Changelog`, unless it maps to a repo root after normalization
+- `Bug Tracker`
+- `Issues`
+- `CI`
+- `Documentation`, unless no better candidate exists
+- `Funding`
+- `Changelog`, unless it maps to a repo root after normalization
 
 ### 7.3 GitHub URL normalization
 
@@ -263,18 +277,18 @@ OWNER/REPO
 
 Strip:
 
-* `.git`
-* trailing slash
-* `tree/<branch>`
-* `blob/<branch>/...`
-* `issues`, `pulls`, `actions`, `releases`, `wiki`, when they can safely collapse to repo root
+- `.git`
+- trailing slash
+- `tree/<branch>`
+- `blob/<branch>/...`
+- `issues`, `pulls`, `actions`, `releases`, `wiki`, when they can safely collapse to repo root
 
 Reject:
 
-* GitHub organization/user profile only
-* GitHub topic/search URLs
-* Gist URLs
-* Links to individual action repos that are not the package’s source repo, unless explicitly marked as source
+- GitHub organization/user profile only
+- GitHub topic/search URLs
+- Gist URLs
+- Links to individual action repos that are not the package’s source repo, unless explicitly marked as source
 
 ## 8. Repository fetching
 
@@ -284,10 +298,10 @@ Reject:
 --repo-fetch auto|api|git|archive
 ```
 
-* `api`: use GitHub API to list and download `.github/workflows/*` only.
-* `git`: shallow clone repository, default depth 1.
-* `archive`: download default branch tarball/zipball.
-* `auto`: prefer API for public GitHub repos; fall back to git.
+- `api`: use GitHub API to list and download `.github/workflows/*` only.
+- `git`: shallow clone repository, default depth 1.
+- `archive`: download default branch tarball/zipball.
+- `auto`: prefer API for public GitHub repos; fall back to git.
 
 Recommended v1 default: `api`, because `zizmor` only needs workflow files and this avoids cloning full repositories.
 
@@ -300,19 +314,19 @@ Recommended v1 default: `api`, because `zizmor` only needs workflow files and th
 
 Default behavior:
 
-* Use `GITHUB_TOKEN` if present.
-* Otherwise unauthenticated GitHub API for public repos.
-* Do not print token values.
+- Use `GITHUB_TOKEN` if present.
+- Otherwise unauthenticated GitHub API for public repos.
+- Do not print token values.
 
 ### 8.3 Pinning scanned content
 
 For each repository, record:
 
-* Owner/repo.
-* Default branch.
-* Commit SHA scanned.
-* Workflow file paths and blob SHAs.
-* Fetch timestamp.
+- Owner/repo.
+- Default branch.
+- Commit SHA scanned.
+- Workflow file paths and blob SHAs.
+- Fetch timestamp.
 
 Reports must distinguish “scanned current default branch at time of scan” from “scanned package release source.”
 
@@ -336,17 +350,17 @@ zizmor --format json PATH_TO_REPO_OR_WORKFLOWS
 
 If using API workflow fetch:
 
-* Create a temporary directory:
+- Create a temporary directory:
 
 ```text
 .tmp/repos/owner__repo/.github/workflows/*.yml
 ```
 
-* Run `zizmor` against that temporary repo-like directory.
+- Run `zizmor` against that temporary repo-like directory.
 
 If using git clone:
 
-* Run `zizmor` against the clone root.
+- Run `zizmor` against the clone root.
 
 ### 9.3 Failure handling
 
@@ -354,21 +368,21 @@ A single failed repository must not fail the whole scan unless `--strict` is set
 
 Statuses:
 
-* `clone_failed`
-* `metadata_failed`
-* `github_api_failed`
-* `zizmor_failed`
-* `no_workflows`
-* `no_repo`
-* `skipped_cached`
+- `clone_failed`
+- `metadata_failed`
+- `github_api_failed`
+- `zizmor_failed`
+- `no_workflows`
+- `no_repo`
+- `skipped_cached`
 
 Exit codes:
 
-* `0`: scan completed; no findings at or above fail threshold.
-* `1`: scan completed; findings at or above fail threshold.
-* `2`: CLI usage/config error.
-* `3`: scan infrastructure error, such as missing `zizmor`, invalid JSON, cache corruption.
-* `4`: partial scan with one or more repository fetch/scan failures and `--fail-on-partial` enabled.
+- `0`: scan completed; no findings at or above fail threshold.
+- `1`: scan completed; findings at or above fail threshold.
+- `2`: CLI usage/config error.
+- `3`: scan infrastructure error, such as missing `zizmor`, invalid JSON, cache corruption.
+- `4`: partial scan with one or more repository fetch/scan failures and `--fail-on-partial` enabled.
 
 ### 9.4 Severity thresholds
 
@@ -410,24 +424,30 @@ Text report sections:
 
 1. Header
 
-   * project path
-   * source adapter
-   * scan timestamp
-   * insecure-tree version
-   * zizmor version
-2. Summary
+   - project path
+   - source adapter
+   - scan timestamp
+   - insecure-tree version
+   - zizmor version
 
-   * total packages
-   * packages with claimed GitHub repos
-   * packages scanned
-   * packages skipped
-   * repos with findings
-   * total findings by severity
-3. Highest-risk findings
-4. Package table
-5. Repository ambiguity table
-6. Skips and failures
-7. Full findings
+1. Summary
+
+   - total packages
+   - packages with claimed GitHub repos
+   - packages scanned
+   - packages skipped
+   - repos with findings
+   - total findings by severity
+
+1. Highest-risk findings
+
+1. Package table
+
+1. Repository ambiguity table
+
+1. Skips and failures
+
+1. Full findings
 
 Example text layout:
 
@@ -463,21 +483,29 @@ urllib3==2.2.2       urllib3/urllib3     no_workflows  -
 
 HTML report requirements:
 
-* Single self-contained HTML file by default.
-* No external JS/CDN by default.
-* Collapsible package rows.
-* Sortable tables using minimal inline JS.
-* Summary cards.
-* Severity filters.
-* Clearly show provenance:
+- Single self-contained HTML file by default.
 
-  * package name/version
-  * dependency path(s)
-  * metadata field used to infer repo
-  * repo URL
-  * commit SHA scanned
-* Link to GitHub workflow lines when commit SHA is known.
-* Include raw JSON download/embed section optionally.
+- No external JS/CDN by default.
+
+- Collapsible package rows.
+
+- Sortable tables using minimal inline JS.
+
+- Summary cards.
+
+- Severity filters.
+
+- Clearly show provenance:
+
+  - package name/version
+  - dependency path(s)
+  - metadata field used to infer repo
+  - repo URL
+  - commit SHA scanned
+
+- Link to GitHub workflow lines when commit SHA is known.
+
+- Include raw JSON download/embed section optionally.
 
 ```bash
 --html-assets inline|directory|none
@@ -507,10 +535,10 @@ Optional flags:
 
 Adapter responsibilities:
 
-* Preserve dependency hierarchy from uv JSON.
-* Mark workspace/project roots.
-* Preserve groups/extras where uv exposes them.
-* Normalize package names according to PEP 503.
+- Preserve dependency hierarchy from uv JSON.
+- Mark workspace/project roots.
+- Preserve groups/extras where uv exposes them.
+- Normalize package names according to PEP 503.
 
 ### 11.2 uv pip adapter
 
@@ -522,8 +550,8 @@ uv pip tree --output-format json --python PYTHON
 
 Adapter responsibilities:
 
-* Treat active environment packages as installed graph.
-* Preserve requested vs transitive if exposed; otherwise infer roots as packages not required by any other discovered package.
+- Treat active environment packages as installed graph.
+- Preserve requested vs transitive if exposed; otherwise infer roots as packages not required by any other discovered package.
 
 ### 11.3 pip inspect adapter
 
@@ -535,18 +563,18 @@ python -m pip inspect
 
 Adapter responsibilities:
 
-* Parse stable JSON report.
-* Build nodes from `installed`.
-* Build edges from each distribution’s `metadata.requires_dist`.
-* Evaluate environment markers against the report environment.
-* Normalize names and resolve installed versions.
-* Mark `requested` when provided.
+- Parse stable JSON report.
+- Build nodes from `installed`.
+- Build edges from each distribution’s `metadata.requires_dist`.
+- Evaluate environment markers against the report environment.
+- Normalize names and resolve installed versions.
+- Mark `requested` when provided.
 
 Limitations:
 
-* The reconstructed graph is environment-level, not lockfile-level.
-* Dependency edges may be ambiguous when extras are involved.
-* If multiple installed distributions satisfy a requirement strangely, report ambiguity rather than hiding it.
+- The reconstructed graph is environment-level, not lockfile-level.
+- Dependency edges may be ambiguous when extras are involved.
+- If multiple installed distributions satisfy a requirement strangely, report ambiguity rather than hiding it.
 
 ### 11.4 pipdeptree adapter
 
@@ -569,11 +597,11 @@ Inputs:
 
 Behavior:
 
-* Parse top-level requirements.
-* If pinned, resolve exact PyPI metadata.
-* If unpinned, resolve latest metadata unless `--no-latest-fallback` is set.
-* Mark graph completeness as `partial`.
-* Recommend using uv lock, uv tree, pip inspect, or pipdeptree for full transitive graph.
+- Parse top-level requirements.
+- If pinned, resolve exact PyPI metadata.
+- If unpinned, resolve latest metadata unless `--no-latest-fallback` is set.
+- Mark graph completeness as `partial`.
+- Recommend using uv lock, uv tree, pip inspect, or pipdeptree for full transitive graph.
 
 ## 12. Caching
 
@@ -587,10 +615,10 @@ ${XDG_CACHE_HOME}/insecure-tree
 
 Cache keys:
 
-* Package metadata: `index_url + normalized_name + version`.
-* GitHub repo metadata: `owner/repo + default_branch + token_scope(public/private flag only)`.
-* Workflow content: `owner/repo + commit_sha`.
-* zizmor result: `zizmor_version + owner/repo + commit_sha + config_hash`.
+- Package metadata: `index_url + normalized_name + version`.
+- GitHub repo metadata: `owner/repo + default_branch + token_scope(public/private flag only)`.
+- Workflow content: `owner/repo + commit_sha`.
+- zizmor result: `zizmor_version + owner/repo + commit_sha + config_hash`.
 
 CLI:
 
@@ -611,17 +639,17 @@ Freshness options:
 
 ## 13. Security and privacy
 
-* Never execute untrusted package code.
-* Prefer static metadata and remote APIs.
-* Do not run repository build scripts.
-* Shallow clone with blob filtering where possible if cloning is needed.
-* Redact tokens from logs, errors, reports, and command traces.
-* Do not upload local dependency graphs anywhere.
-* Include `--offline` mode that only uses existing graph JSON and cache.
-* Include `--no-clone` mode that only reports candidate repos without scanning.
-* Treat PyPI metadata as untrusted user-controlled input; escape everything in HTML.
-* Bound concurrency and file sizes.
-* Set network timeouts.
+- Never execute untrusted package code.
+- Prefer static metadata and remote APIs.
+- Do not run repository build scripts.
+- Shallow clone with blob filtering where possible if cloning is needed.
+- Redact tokens from logs, errors, reports, and command traces.
+- Do not upload local dependency graphs anywhere.
+- Include `--offline` mode that only uses existing graph JSON and cache.
+- Include `--no-clone` mode that only reports candidate repos without scanning.
+- Treat PyPI metadata as untrusted user-controlled input; escape everything in HTML.
+- Bound concurrency and file sizes.
+- Set network timeouts.
 
 ## 14. Configuration file
 
@@ -694,19 +722,19 @@ Options:
 
 Defaults:
 
-* metadata requests: 16
-* GitHub requests: 8
-* zizmor scans: number of CPU cores, capped at 8
-* per-request timeout: 30 seconds
-* per-repo scan timeout: 120 seconds
+- metadata requests: 16
+- GitHub requests: 8
+- zizmor scans: number of CPU cores, capped at 8
+- per-request timeout: 30 seconds
+- per-repo scan timeout: 120 seconds
 
 Use a work queue:
 
 1. Resolve all package metadata.
-2. Deduplicate repo candidates.
-3. Fetch workflows once per repo.
-4. Scan once per unique repo SHA.
-5. Fan results back out to packages.
+1. Deduplicate repo candidates.
+1. Fetch workflows once per repo.
+1. Scan once per unique repo SHA.
+1. Fan results back out to packages.
 
 ## 17. Package/repo deduplication
 
@@ -806,96 +834,100 @@ insecure_tree/
 
 Recommended libraries:
 
-* `typer` or `click` for CLI.
-* `pydantic` or dataclasses plus `cattrs` for internal models.
-* `packaging` for requirement parsing, markers, and name normalization.
-* `httpx` for async HTTP.
-* `jinja2` for HTML templates.
-* `rich` for optional terminal progress.
+- `typer` or `click` for CLI.
+- `pydantic` or dataclasses plus `cattrs` for internal models.
+- `packaging` for requirement parsing, markers, and name normalization.
+- `httpx` for async HTTP.
+- `jinja2` for HTML templates.
+- `rich` for optional terminal progress.
 
 ## 20. Test plan
 
 ### 20.1 Unit tests
 
-* Package name normalization.
-* Requirement parsing and marker evaluation.
-* GitHub URL extraction and rejection.
-* Metadata source priority.
-* Repo candidate confidence scoring.
-* Zizmor JSON parsing.
-* HTML escaping.
-* Cache key generation.
+- Package name normalization.
+- Requirement parsing and marker evaluation.
+- GitHub URL extraction and rejection.
+- Metadata source priority.
+- Repo candidate confidence scoring.
+- Zizmor JSON parsing.
+- HTML escaping.
+- Cache key generation.
 
 ### 20.2 Adapter fixtures
 
-* uv project tree JSON.
-* uv pip tree JSON.
-* pip inspect JSON.
-* pipdeptree JSON.
-* requirements file with pinned, unpinned, extras, markers, direct URLs.
+- uv project tree JSON.
+- uv pip tree JSON.
+- pip inspect JSON.
+- pipdeptree JSON.
+- requirements file with pinned, unpinned, extras, markers, direct URLs.
 
 ### 20.3 Integration tests
 
-* Small real project with 5–10 dependencies.
-* Project with dependencies sharing one repo.
-* Package with no GitHub metadata.
-* Package with GitHub issue URL but no repo URL.
-* Repo with no workflows.
-* Repo with known zizmor finding fixture.
-* GitHub API rate-limit simulation.
-* Missing `zizmor` binary.
+- Small real project with 5–10 dependencies.
+- Project with dependencies sharing one repo.
+- Package with no GitHub metadata.
+- Package with GitHub issue URL but no repo URL.
+- Repo with no workflows.
+- Repo with known zizmor finding fixture.
+- GitHub API rate-limit simulation.
+- Missing `zizmor` binary.
 
 ### 20.4 Snapshot tests
 
-* Text report snapshots.
-* HTML report snapshots after normalizing timestamps.
-* JSON schema snapshots.
+- Text report snapshots.
+- HTML report snapshots after normalizing timestamps.
+- JSON schema snapshots.
 
 ## 21. Open questions
 
 1. Should v1 scan only default branches, or try to map package versions to Git tags?
 
-   * Recommendation: default branch in v1; add `--scan-release-ref` later.
-2. Should reports include packages with non-GitHub repos?
+   - Recommendation: default branch in v1; add `--scan-release-ref` later.
 
-   * Recommendation: yes, under “not scanned,” with reason `non_github_repo`.
-3. Should `insecure-tree` expose SARIF output?
+1. Should reports include packages with non-GitHub repos?
 
-   * Recommendation: not required for v1 text/HTML, but keep JSON model compatible enough to add SARIF later.
-4. Should scans be reproducible by pinning GitHub SHAs?
+   - Recommendation: yes, under “not scanned,” with reason `non_github_repo`.
 
-   * Recommendation: always record SHAs; support `--repo-lock insecure-tree-repos.lock` in v2.
-5. Should dependency paths be fully enumerated?
+1. Should `insecure-tree` expose SARIF output?
 
-   * Recommendation: include up to N shortest paths per package, default 3, to avoid huge reports.
+   - Recommendation: not required for v1 text/HTML, but keep JSON model compatible enough to add SARIF later.
+
+1. Should scans be reproducible by pinning GitHub SHAs?
+
+   - Recommendation: always record SHAs; support `--repo-lock insecure-tree-repos.lock` in v2.
+
+1. Should dependency paths be fully enumerated?
+
+   - Recommendation: include up to N shortest paths per package, default 3, to avoid huge reports.
 
 ## 22. Suggested v1 milestone cut
 
 Must-have:
 
-* `scan` command.
-* `uv` adapter.
-* `pip-inspect` adapter.
-* PyPI metadata fetch.
-* GitHub URL extraction.
-* GitHub API workflow fetch.
-* `zizmor` JSON invocation.
-* text, HTML, and JSON output.
-* cache.
-* basic config.
+- `scan` command.
+- `uv` adapter.
+- `pip-inspect` adapter.
+- PyPI metadata fetch.
+- GitHub URL extraction.
+- GitHub API workflow fetch.
+- `zizmor` JSON invocation.
+- text, HTML, and JSON output.
+- cache.
+- basic config.
 
 Nice-to-have:
 
-* `uv-pip` adapter.
-* `pipdeptree` adapter.
-* ignore policy.
-* repo overrides.
-* CI fail thresholds.
+- `uv-pip` adapter.
+- `pipdeptree` adapter.
+- ignore policy.
+- repo overrides.
+- CI fail thresholds.
 
 Post-v1:
 
-* SARIF output.
-* release-tag scanning.
-* SBOM import/export.
-* GitHub issue generation.
-* baseline/diff mode.
+- SARIF output.
+- release-tag scanning.
+- SBOM import/export.
+- GitHub issue generation.
+- baseline/diff mode.
