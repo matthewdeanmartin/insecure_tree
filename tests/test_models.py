@@ -1,7 +1,5 @@
 """Tests for domain models."""
 from insecure_tree.models import (
-    ConfidenceLevel,
-    DependencyGraph,
     GraphEdge,
     PackageNode,
     Report,

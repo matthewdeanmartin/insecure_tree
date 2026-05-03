@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List
 
-from insecure_tree.models import PackageNode, Report, ScanStatus
+from insecure_tree.models import Report, ScanStatus
 
 _SEV_BADGE = {"error": "[error]", "warning": "[warn ]", "note": "[note ]"}
 
