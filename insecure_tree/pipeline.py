@@ -145,7 +145,7 @@ async def _fetch_and_scan(
             cache=cache,
             timeout=120.0,
         )
-    except ScanInfraError as exc:
+    except ScanInfraError:
         raise  # Propagate missing zizmor as infrastructure error
     except Exception as exc:
         scan_result = ScanResult(status=ScanStatus.zizmor_failed, error_message=str(exc))

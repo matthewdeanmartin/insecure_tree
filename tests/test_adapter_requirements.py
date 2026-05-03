@@ -1,5 +1,4 @@
 """Tests for the requirements.txt adapter."""
-from pathlib import Path
 
 import pytest
 
