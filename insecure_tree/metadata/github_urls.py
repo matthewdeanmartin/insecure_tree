@@ -34,10 +34,19 @@ _REJECT_LABELS = frozenset(["bug tracker", "issues", "issue tracker", "ci", "fun
 _DOC_LABELS = frozenset(["documentation", "docs"])
 _CHANGELOG_LABELS = frozenset(["changelog", "changes", "history", "release notes"])
 
-_REJECT_PATH_PARTS = frozenset([
-    "issues", "pulls", "pull", "actions", "releases", "wiki",
-    "gist.github.com", "topics", "search",
-])
+_REJECT_PATH_PARTS = frozenset(
+    [
+        "issues",
+        "pulls",
+        "pull",
+        "actions",
+        "releases",
+        "wiki",
+        "gist.github.com",
+        "topics",
+        "search",
+    ]
+)
 
 
 def _parse_github(raw: str) -> tuple[str, str] | None:
@@ -144,33 +153,39 @@ def extract_github_candidates(metadata: PackageMetadata) -> list[RepoCandidate]:
         parsed = _parse_github(metadata.home_page)
         if parsed and not _is_rejected_path(metadata.home_page, *parsed):
             owner, repo = parsed
-            add(RepoCandidate(
-                url=f"https://github.com/{owner}/{repo}",
-                owner=owner,
-                repo=repo,
-                source_field="home_page",
-                confidence=ConfidenceLevel.medium,
-                reason="home_page field points to GitHub project root",
-                normalized_clone_url=_normalize_clone_url(owner, repo),
-            ))
+            add(
+                RepoCandidate(
+                    url=f"https://github.com/{owner}/{repo}",
+                    owner=owner,
+                    repo=repo,
+                    source_field="home_page",
+                    confidence=ConfidenceLevel.medium,
+                    reason="home_page field points to GitHub project root",
+                    normalized_clone_url=_normalize_clone_url(owner, repo),
+                )
+            )
 
     # download_url
     if metadata.download_url:
-        add(_candidate_from_url(
-            metadata.download_url,
-            "download_url",
-            ConfidenceLevel.low,
-            "download_url field contains GitHub URL",
-        ))
+        add(
+            _candidate_from_url(
+                metadata.download_url,
+                "download_url",
+                ConfidenceLevel.low,
+                "download_url field contains GitHub URL",
+            )
+        )
 
     # docs_url — very low confidence
     if metadata.docs_url:
-        add(_candidate_from_url(
-            metadata.docs_url,
-            "docs_url",
-            ConfidenceLevel.low,
-            "docs_url field contains GitHub URL (low confidence)",
-        ))
+        add(
+            _candidate_from_url(
+                metadata.docs_url,
+                "docs_url",
+                ConfidenceLevel.low,
+                "docs_url field contains GitHub URL (low confidence)",
+            )
+        )
 
     # description — scan for GitHub URLs
     if metadata.description:
@@ -178,15 +193,17 @@ def extract_github_candidates(metadata: PackageMetadata) -> list[RepoCandidate]:
             raw = m.group(0)
             owner, repo_name = m.group(1), m.group(2).removesuffix(".git")
             if not _is_rejected_path(raw, owner, repo_name):
-                add(RepoCandidate(
-                    url=f"https://github.com/{owner}/{repo_name}",
-                    owner=owner,
-                    repo=repo_name,
-                    source_field="description",
-                    confidence=ConfidenceLevel.low,
-                    reason="GitHub URL found in package description",
-                    normalized_clone_url=_normalize_clone_url(owner, repo_name),
-                ))
+                add(
+                    RepoCandidate(
+                        url=f"https://github.com/{owner}/{repo_name}",
+                        owner=owner,
+                        repo=repo_name,
+                        source_field="description",
+                        confidence=ConfidenceLevel.low,
+                        reason="GitHub URL found in package description",
+                        normalized_clone_url=_normalize_clone_url(owner, repo_name),
+                    )
+                )
 
     _rank = [ConfidenceLevel.high, ConfidenceLevel.medium, ConfidenceLevel.low]
     return sorted(seen.values(), key=lambda c: _rank.index(c.confidence))

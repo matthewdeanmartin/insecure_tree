@@ -32,7 +32,7 @@ def _recover_partial_pip_inspect(stdout: str) -> dict[str, Any] | None:
     s = stdout.rstrip()
     # Attempt to close the truncated JSON by finding last complete top-level "}" that
     # closes an entry in the installed list
-    pattern = re.compile(r'\}\s*,?\s*\n?\s*\{', re.DOTALL)
+    pattern = re.compile(r"\}\s*,?\s*\n?\s*\{", re.DOTALL)
     # Find the position of the last "}, {" pair — that's where the last complete entry ends
     best_cut = -1
     for m in pattern.finditer(s):
@@ -137,14 +137,16 @@ class PipInspectAdapter(BaseAdapter):
             pkg_key = f"{norm}=={version}"
             if is_root:
                 roots.append(pkg_key)
-            nodes.append(PackageNode(
-                name=name,
-                normalized_name=norm,
-                version=version,
-                source=SourceAdapter.pip_inspect.value,
-                requested=is_root,
-                depth=0 if is_root else 1,
-            ))
+            nodes.append(
+                PackageNode(
+                    name=name,
+                    normalized_name=norm,
+                    version=version,
+                    source=SourceAdapter.pip_inspect.value,
+                    requested=is_root,
+                    depth=0 if is_root else 1,
+                )
+            )
 
         for from_key, to_key, req_str, extras, marker in edge_list:
             edges.append(

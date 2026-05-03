@@ -28,22 +28,22 @@ def _walk(
     pkg_key = f"{norm}=={version}"
 
     if not any(n.normalized_name == norm and n.version == version for n in nodes):
-        nodes.append(PackageNode(
-            name=name,
-            normalized_name=norm,
-            version=version,
-            source=SourceAdapter.uv.value,
-            requested=(depth == 0),
-            depth=depth,
-        ))
+        nodes.append(
+            PackageNode(
+                name=name,
+                normalized_name=norm,
+                version=version,
+                source=SourceAdapter.uv.value,
+                requested=(depth == 0),
+                depth=depth,
+            )
+        )
 
     for dep in node.get("dependencies", []):
         dep_name = dep.get("name", "")
         dep_version = dep.get("version", "")
         dep_norm = canonicalize(dep_name)
-        edge = GraphEdge(
-            **{"from": pkg_key, "to": f"{dep_norm}=={dep_version}", "source": SourceAdapter.uv.value}
-        )
+        edge = GraphEdge(**{"from": pkg_key, "to": f"{dep_norm}=={dep_version}", "source": SourceAdapter.uv.value})
         edges.append(edge)
         _walk(dep, nodes, edges, depth + 1, pkg_key)
 

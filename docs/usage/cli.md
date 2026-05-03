@@ -11,7 +11,7 @@ insecure-tree [--version] [-v / --verbose] <command>
 | `--version` | Print version and exit |
 | `-v`, `--verbose` | Enable debug logging |
 
----
+______________________________________________________________________
 
 ## `scan` — run the full audit pipeline
 
@@ -83,7 +83,7 @@ Runs: dependency discovery → PyPI metadata → GitHub URL extraction → workf
 | `3` | Infrastructure error (missing zizmor, invalid JSON, cache corruption) |
 | `4` | Partial scan failure with `--fail-on-partial` enabled |
 
----
+______________________________________________________________________
 
 ## `graph` — emit dependency graph only
 
@@ -101,7 +101,7 @@ insecure-tree graph --source uv --format json > my-graph.json
 insecure-tree graph --format text
 ```
 
----
+______________________________________________________________________
 
 ## `metadata` — inspect PyPI metadata for a package
 
@@ -116,7 +116,7 @@ insecure-tree metadata requests
 insecure-tree metadata requests --version 2.32.3
 ```
 
----
+______________________________________________________________________
 
 ## `report` — re-render a report from saved JSON
 
@@ -132,7 +132,7 @@ insecure-tree report \
   --format html
 ```
 
----
+______________________________________________________________________
 
 ## `cache` — manage the local cache
 

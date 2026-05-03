@@ -6,6 +6,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+
 from insecure_tree.cache import Cache
 from insecure_tree.github.client import GitHubAPIError, GitHubClient
 
@@ -48,13 +49,21 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
             repo_info = await client.get_repo_info(owner, repo)
             default_branch = repo_info.get("default_branch", "main")
             archived = repo_info.get("archived", False)
-            cache.put("github_repo", cache_key, json.dumps({
-                "default_branch": default_branch,
-                "archived": archived,
-            }), ttl)
+            cache.put(
+                "github_repo",
+                cache_key,
+                json.dumps(
+                    {
+                        "default_branch": default_branch,
+                        "archived": archived,
+                    }
+                ),
+                ttl,
+            )
     except GitHubAPIError as exc:
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="github_api_failed",
             error_message=str(exc),
         )
@@ -74,7 +83,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
             cache.put("github_sha", sha_cache_key, commit_sha, min(ttl, 3600))
     except GitHubAPIError as exc:
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="github_api_failed",
             error_message=str(exc),
             default_branch=default_branch,
@@ -86,7 +96,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
     if cached_workflows and isinstance(cached_workflows, list) and cached_workflows:
         workflow_dir = _write_workflows(owner, repo, cached_workflows, tmp_base)
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="ok",
             workflow_dir=workflow_dir,
             commit_sha=commit_sha,
@@ -99,7 +110,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
         workflow_files = await client.list_workflow_files(owner, repo, commit_sha)
     except GitHubAPIError as exc:
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="github_api_failed",
             error_message=str(exc),
             default_branch=default_branch,
@@ -108,7 +120,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
 
     if not workflow_files:
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="no_workflows",
             default_branch=default_branch,
             commit_sha=commit_sha,
@@ -132,7 +145,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
 
     if not fetched:
         return FetchResult(
-            owner=owner, repo=repo,
+            owner=owner,
+            repo=repo,
             status="no_workflows",
             default_branch=default_branch,
             commit_sha=commit_sha,
@@ -142,7 +156,8 @@ async def fetch_workflows(  # pylint: disable=too-many-return-statements
     workflow_dir = _write_workflows(owner, repo, fetched, tmp_base)
 
     return FetchResult(
-        owner=owner, repo=repo,
+        owner=owner,
+        repo=repo,
         status="ok",
         workflow_dir=workflow_dir,
         commit_sha=commit_sha,

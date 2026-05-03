@@ -28,19 +28,19 @@ def _walk(
     pkg_key = f"{norm}=={version}"
 
     if not any(n.normalized_name == norm and n.version == version for n in nodes):
-        nodes.append(PackageNode(
-            name=name,
-            normalized_name=norm,
-            version=version,
-            source=SourceAdapter.uv_pip.value,
-            requested=(depth == 0),
-            depth=depth,
-        ))
+        nodes.append(
+            PackageNode(
+                name=name,
+                normalized_name=norm,
+                version=version,
+                source=SourceAdapter.uv_pip.value,
+                requested=(depth == 0),
+                depth=depth,
+            )
+        )
 
     if parent_key:
-        edge = GraphEdge(
-            **{"from": parent_key, "to": pkg_key, "source": SourceAdapter.uv_pip.value}
-        )
+        edge = GraphEdge(**{"from": parent_key, "to": pkg_key, "source": SourceAdapter.uv_pip.value})
         edges.append(edge)
 
     for dep in node.get("dependencies", []):

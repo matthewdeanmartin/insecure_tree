@@ -2,7 +2,8 @@
 site_name: insecure-tree
 site_url: https://insecure_tree.readthedocs.io/
 site_author: Matthew Martin <matthewdeanmartin@gmail.com>
-site_description: Audit GitHub Actions security posture of your Python dependency tree using zizmor
+site_description: Audit GitHub Actions security posture of your Python dependency
+  tree using zizmor
 repo_url: https://github.com/matthewdeanmartin/insecure_tree
 theme:
   name: readthedocs

@@ -1,4 +1,5 @@
 """Tests for HTML report generation."""
+
 from insecure_tree.models import PackageNode, Report, ReportSummary, ScanResult, ScanStatus
 from insecure_tree.report.html import write_html
 

@@ -115,7 +115,8 @@ async def _fetch_and_scan(
         return repo_key, ScanResult(status=ScanStatus.skipped, error_message="--no-clone set")
 
     fetch_result: FetchResult = await fetch_workflows(
-        owner, repo,
+        owner,
+        repo,
         client=gh_client,
         cache=cache,
         ttl=repo_ttl,
@@ -190,14 +191,17 @@ async def run_scan(config: Config) -> Report:
             norm = pkg.normalized_name
             if norm in config.repo_overrides or pkg.name in config.repo_overrides:
                 override_url = config.repo_overrides.get(norm) or config.repo_overrides.get(pkg.name, "")
-                from insecure_tree.metadata.github_urls import _parse_github, _normalize_clone_url
+                from insecure_tree.metadata.github_urls import _normalize_clone_url, _parse_github
+
                 parsed = _parse_github(override_url)
                 if parsed:
                     from insecure_tree.models import ConfidenceLevel, RepoCandidate
+
                     o, r = parsed
                     cand = RepoCandidate(
                         url=f"https://github.com/{o}/{r}",
-                        owner=o, repo=r,
+                        owner=o,
+                        repo=r,
                         source_field="config_override",
                         confidence=ConfidenceLevel.high,
                         reason="User-configured repo override",
@@ -222,9 +226,7 @@ async def run_scan(config: Config) -> Report:
 
                 async def fetch_one(owner: str, repo: str) -> tuple[str, ScanResult]:
                     async with gh_sem:
-                        return await _fetch_and_scan(
-                            owner, repo, gh_client, cache, config.repo_ttl, tmp_path, config
-                        )
+                        return await _fetch_and_scan(owner, repo, gh_client, cache, config.repo_ttl, tmp_path, config)
 
                 unique_repos = list(repo_to_packages.keys())
                 results = await asyncio.gather(
@@ -275,8 +277,7 @@ async def run_scan(config: Config) -> Report:
         graph=graph,
         has_findings_above_threshold=_check_threshold(summary, config.fail_on),
         has_partial_failures=any(
-            p.scan and p.scan.status in (ScanStatus.github_api_failed, ScanStatus.zizmor_failed)
-            for p in final_nodes
+            p.scan and p.scan.status in (ScanStatus.github_api_failed, ScanStatus.zizmor_failed) for p in final_nodes
         ),
     )
 
@@ -326,11 +327,13 @@ def _check_threshold(summary: ReportSummary, fail_on: str) -> bool:
 
 def _read_token(env_var: str) -> str | None:
     import os
+
     return os.environ.get(env_var) or None
 
 
 class _NullCache(Cache):  # pylint: disable=super-init-not-called
     """Cache that never stores anything."""
+
     def __init__(self) -> None:  # pylint: disable=super-init-not-called
         pass
 

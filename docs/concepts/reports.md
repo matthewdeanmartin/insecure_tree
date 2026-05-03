@@ -40,11 +40,11 @@ certifi==2024.2.2    certifi/python-certifi  scanned     0
 Sections:
 
 1. **Header** — project path, source adapter, timestamp, tool versions.
-2. **Summary** — package counts, scan counts, finding totals.
-3. **Top findings** — highest-severity findings across all packages.
-4. **Packages** — one row per package with status and finding count.
-5. **Skips and failures** — packages that could not be scanned and why.
-6. **Full findings** — all findings grouped by package.
+1. **Summary** — package counts, scan counts, finding totals.
+1. **Top findings** — highest-severity findings across all packages.
+1. **Packages** — one row per package with status and finding count.
+1. **Skips and failures** — packages that could not be scanned and why.
+1. **Full findings** — all findings grouped by package.
 
 ## HTML report (`insecure-tree.html`)
 

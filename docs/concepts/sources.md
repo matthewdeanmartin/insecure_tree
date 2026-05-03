@@ -7,10 +7,10 @@ insecure-tree supports multiple adapters for building the dependency graph. Use 
 With `--source auto`, insecure-tree probes in this order and uses the first adapter that succeeds:
 
 1. `uv` — if `uv.lock` and `pyproject.toml` exist in the project root.
-2. `uv-pip` — if `uv pip tree` is available for the active or specified Python.
-3. `pip-inspect` — if `pip inspect` is available.
-4. `pipdeptree` — if `pipdeptree` is installed.
-5. `requirements` — if any `requirements*.txt` file exists.
+1. `uv-pip` — if `uv pip tree` is available for the active or specified Python.
+1. `pip-inspect` — if `pip inspect` is available.
+1. `pipdeptree` — if `pipdeptree` is installed.
+1. `requirements` — if any `requirements*.txt` file exists.
 
 ## `uv` adapter
 

@@ -89,9 +89,13 @@ def write_text(report: Report, path: Path) -> None:
     lines.append("")
 
     # Skips and failures
-    failed = [p for p in report.packages if p.scan and p.scan.status not in (
-        ScanStatus.scanned, ScanStatus.no_repo, ScanStatus.no_workflows, ScanStatus.skipped_cached
-    )]
+    failed = [
+        p
+        for p in report.packages
+        if p.scan
+        and p.scan.status
+        not in (ScanStatus.scanned, ScanStatus.no_repo, ScanStatus.no_workflows, ScanStatus.skipped_cached)
+    ]
     if failed:
         h2("Failures")
         for pkg in failed:

@@ -1,4 +1,5 @@
 """Tests for name normalization."""
+
 from insecure_tree.normalize import canonicalize, parse_version
 
 

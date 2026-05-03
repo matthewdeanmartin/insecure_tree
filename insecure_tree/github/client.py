@@ -45,6 +45,7 @@ class GitHubClient:
             if remaining == 0:
                 reset_at = int(resp.headers.get("X-RateLimit-Reset", "0"))
                 import time
+
                 wait = max(0.0, reset_at - time.time()) + 1
                 log.warning("GitHub rate limit hit; sleeping %.1fs", wait)
                 await asyncio.sleep(wait)
@@ -89,6 +90,7 @@ class GitHubClient:
         data = await self._get(f"/repos/{owner}/{repo}/contents/{path}?ref={ref}")
         if isinstance(data, dict) and data.get("encoding") == "base64":
             import base64
+
             content = data.get("content", "").replace("\n", "")
             return base64.b64decode(content)
         # Fallback: raw download_url

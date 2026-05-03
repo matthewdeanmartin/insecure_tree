@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from packaging.markers import Marker, default_environment
 
 

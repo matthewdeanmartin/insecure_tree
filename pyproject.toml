@@ -8,7 +8,7 @@ keywords = ["security", "supply-chain", "github-actions", "zizmor", "dependencie
 license = "MIT"
 requires-python = ">=3.10"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 1 - Planning",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",

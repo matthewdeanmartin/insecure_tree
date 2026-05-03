@@ -5,10 +5,10 @@
 Given a Python project or environment, it:
 
 1. Builds the full transitive dependency graph (using `uv`, `pip inspect`, `pipdeptree`, or a `requirements.txt`).
-2. Fetches package metadata from PyPI to find claimed GitHub repository URLs.
-3. Downloads `.github/workflows/*.yml` files for each repository via the GitHub API.
-4. Runs [zizmor](https://github.com/woodruffw/zizmor) against each set of workflow files.
-5. Writes a unified report — text, HTML, and JSON — showing all findings and which packages they came from.
+1. Fetches package metadata from PyPI to find claimed GitHub repository URLs.
+1. Downloads `.github/workflows/*.yml` files for each repository via the GitHub API.
+1. Runs [zizmor](https://github.com/woodruffw/zizmor) against each set of workflow files.
+1. Writes a unified report — text, HTML, and JSON — showing all findings and which packages they came from.
 
 ## What it is not
 

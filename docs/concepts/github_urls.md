@@ -7,10 +7,10 @@ insecure-tree inspects several PyPI metadata fields to find which GitHub reposit
 In descending priority:
 
 1. **`project_urls`** — the most reliable field. Each entry has a label (e.g. `Source`, `Homepage`) and a URL.
-2. **`home_page`** — the legacy homepage field.
-3. **`download_url`** — low confidence; may point to a release archive rather than the repo root.
-4. **`docs_url`** — very low confidence.
-5. **`description`** — the package long-description text is scanned with a regex. Low confidence.
+1. **`home_page`** — the legacy homepage field.
+1. **`download_url`** — low confidence; may point to a release archive rather than the repo root.
+1. **`docs_url`** — very low confidence.
+1. **`description`** — the package long-description text is scanned with a regex. Low confidence.
 
 ## Confidence levels
 

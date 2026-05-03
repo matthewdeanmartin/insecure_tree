@@ -73,16 +73,18 @@ def _parse_zizmor_json(raw: dict[str, Any], owner: str, repo: str, commit_sha: s
                 except (IndexError, TypeError, KeyError):
                     pass
 
-            findings.append(ScanFinding(
-                rule_id=rule_id,
-                severity=severity,
-                title=title,
-                path=path,
-                line=line,
-                column=col,
-                message=msg_text,
-                url=url,
-            ))
+            findings.append(
+                ScanFinding(
+                    rule_id=rule_id,
+                    severity=severity,
+                    title=title,
+                    path=path,
+                    line=line,
+                    column=col,
+                    message=msg_text,
+                    url=url,
+                )
+            )
     return findings
 
 
@@ -158,10 +160,15 @@ async def run_zizmor(  # pylint: disable=too-many-return-statements
 
     findings = _parse_zizmor_json(data, owner, repo, commit_sha)
 
-    cache.put_json("zizmor", cache_key, {
-        "findings": [f.model_dump() for f in findings],
-        "workflow_count": workflow_count,
-    }, 7 * 24 * 3600)
+    cache.put_json(
+        "zizmor",
+        cache_key,
+        {
+            "findings": [f.model_dump() for f in findings],
+            "workflow_count": workflow_count,
+        },
+        7 * 24 * 3600,
+    )
 
     return _build_result(ScanStatus.scanned, zizmor_version, repo_ref, findings, workflow_count)
 

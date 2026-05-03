@@ -65,12 +65,12 @@ insecure_tree/
 ## Adding a new dependency adapter
 
 1. Create `insecure_tree/adapters/my_source.py` implementing `BaseAdapter`.
-2. Override `detect(options)` to return `True` when your source is available.
-3. Override `fetch(options)` to return a `DependencyGraph`.
-4. Register the adapter in `pipeline._auto_detect_adapter` and `_choose_adapter`.
-5. Add a `SourceAdapter.my_source` enum value in `models.py`.
-6. Add a CLI choice in `cli._add_common_source_args`.
-7. Add adapter fixtures and tests in `tests/`.
+1. Override `detect(options)` to return `True` when your source is available.
+1. Override `fetch(options)` to return a `DependencyGraph`.
+1. Register the adapter in `pipeline._auto_detect_adapter` and `_choose_adapter`.
+1. Add a `SourceAdapter.my_source` enum value in `models.py`.
+1. Add a CLI choice in `cli._add_common_source_args`.
+1. Add adapter fixtures and tests in `tests/`.
 
 ## Code style
 

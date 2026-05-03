@@ -10,7 +10,7 @@ from insecure_tree.models import (
     ScanResult,
     ScanStatus,
 )
-from insecure_tree.pipeline import _NullCache, _build_summary, _check_threshold, _first_zizmor_version, _read_token
+from insecure_tree.pipeline import _build_summary, _check_threshold, _first_zizmor_version, _NullCache, _read_token
 
 
 def _repo_candidate(name: str) -> RepoCandidate:

@@ -31,14 +31,19 @@ def _setup_logging(verbose: bool) -> None:
 # Subcommand: scan
 # ---------------------------------------------------------------------------
 
+
 def _add_common_source_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--source", default="auto",
-                        choices=["auto", "uv", "uv-pip", "pip-inspect", "pipdeptree", "requirements", "json"],
-                        help="Dependency source adapter")
+    parser.add_argument(
+        "--source",
+        default="auto",
+        choices=["auto", "uv", "uv-pip", "pip-inspect", "pipdeptree", "requirements", "json"],
+        help="Dependency source adapter",
+    )
     parser.add_argument("--project", default=".", metavar="PATH", help="Project root directory")
     parser.add_argument("--python", default=None, metavar="PYTHON", help="Python interpreter path")
-    parser.add_argument("--requirements", action="append", default=[], metavar="FILE",
-                        help="requirements.txt file(s); repeatable")
+    parser.add_argument(
+        "--requirements", action="append", default=[], metavar="FILE", help="requirements.txt file(s); repeatable"
+    )
     parser.add_argument("--depth", type=int, default=None, metavar="N", help="Max dependency depth")
     parser.add_argument("--include-dev", action="store_true", default=True)
     parser.add_argument("--exclude-dev", dest="include_dev", action="store_false")
@@ -46,9 +51,14 @@ def _add_common_source_args(parser: argparse.ArgumentParser) -> None:
 
 def _add_output_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--output-dir", default="insecure-tree-report", metavar="DIR")
-    parser.add_argument("--format", action="append", dest="formats", default=[],
-                        choices=["text", "html", "json"],
-                        help="Output format(s); repeatable (default: text html json)")
+    parser.add_argument(
+        "--format",
+        action="append",
+        dest="formats",
+        default=[],
+        choices=["text", "html", "json"],
+        help="Output format(s); repeatable (default: text html json)",
+    )
 
 
 def _add_github_args(parser: argparse.ArgumentParser) -> None:
@@ -127,11 +137,13 @@ def _build_config(args: argparse.Namespace) -> Config:
     # GitHub
     token = getattr(args, "github_token", None) or os.environ.get(getattr(args, "github_token_env", "GITHUB_TOKEN"))
     from insecure_tree.models import GitHubConfig
+
     gh = GitHubConfig(token_env=getattr(args, "github_token_env", "GITHUB_TOKEN"), token=token)
     config = config.model_copy(update={"github": gh})
 
     # zizmor
     from insecure_tree.models import ZizmorphConfig
+
     zizmor_bin = getattr(args, "zizmor_bin", "zizmor")
     zizmor_args = getattr(args, "zizmor_args", [])
     config = config.model_copy(update={"zizmor": ZizmorphConfig(bin=zizmor_bin, args=zizmor_args)})
@@ -152,11 +164,11 @@ def _build_config(args: argparse.Namespace) -> Config:
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
+    from insecure_tree.models import ReportFormat
     from insecure_tree.pipeline import run_scan
     from insecure_tree.report.html import write_html
     from insecure_tree.report.json import write_json
     from insecure_tree.report.text import write_text
-    from insecure_tree.models import ReportFormat
     from insecure_tree.scanners.zizmor import ScanInfraError
 
     config = _build_config(args)
@@ -218,6 +230,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 # Subcommand: graph
 # ---------------------------------------------------------------------------
 
+
 def cmd_graph(args: argparse.Namespace) -> int:
     from insecure_tree.adapters.base import AdapterOptions
 
@@ -233,6 +246,7 @@ def cmd_graph(args: argparse.Namespace) -> int:
     )
 
     from insecure_tree.pipeline import _choose_adapter
+
     adapter = _choose_adapter(config.source, options, config)
     graph = adapter.fetch(options)
 
@@ -248,6 +262,7 @@ def cmd_graph(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # Subcommand: metadata
 # ---------------------------------------------------------------------------
+
 
 def cmd_metadata(args: argparse.Namespace) -> int:
     from insecure_tree.cache import Cache
@@ -278,6 +293,7 @@ def cmd_metadata(args: argparse.Namespace) -> int:
 # Subcommand: report
 # ---------------------------------------------------------------------------
 
+
 def cmd_report(args: argparse.Namespace) -> int:
     from insecure_tree.models import Report
     from insecure_tree.report.html import write_html
@@ -293,7 +309,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     output_dir = Path(getattr(args, "output_dir", "insecure-tree-report"))
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for fmt in (getattr(args, "formats", []) or ["text", "html"]):
+    for fmt in getattr(args, "formats", []) or ["text", "html"]:
         if fmt == "json":
             write_json(report, output_dir / "insecure-tree.json")
         elif fmt == "text":
@@ -306,6 +322,7 @@ def cmd_report(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # Subcommand: cache
 # ---------------------------------------------------------------------------
+
 
 def cmd_cache(args: argparse.Namespace) -> int:
     from insecure_tree.cache import Cache, platform_cache_dir
@@ -336,6 +353,7 @@ def _parse_duration(s: str) -> int:
 # ---------------------------------------------------------------------------
 # Parser assembly
 # ---------------------------------------------------------------------------
+
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(

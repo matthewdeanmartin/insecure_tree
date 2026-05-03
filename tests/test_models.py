@@ -1,4 +1,5 @@
 """Tests for domain models."""
+
 from insecure_tree.models import (
     GraphEdge,
     PackageNode,
@@ -38,9 +39,7 @@ def test_report_roundtrip():
         scan_timestamp="2026-05-03T00:00:00Z",
         insecure_tree_version="0.1.0",
         summary=ReportSummary(total_packages=5),
-        packages=[
-            PackageNode(name="requests", normalized_name="requests", version="2.32.3")
-        ],
+        packages=[PackageNode(name="requests", normalized_name="requests", version="2.32.3")],
     )
     json_str = report.model_dump_json()
     restored = Report.model_validate_json(json_str)

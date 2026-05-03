@@ -10,7 +10,5 @@ updates:
     # Only auto-open PRs for security advisories between quarterly bumps.
     # For routine version bumps we rely on `make gha-upgrade` run manually.
     ignore:
-      - dependency-name: "*"
-        update-types:
-          - version-update:semver-minor
-          - version-update:semver-patch
+      - dependency-name: '*'
+        update-types: [version-update:semver-minor, version-update:semver-patch]

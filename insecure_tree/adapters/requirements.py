@@ -64,14 +64,16 @@ class RequirementsAdapter(BaseAdapter):
                         version = spec.version
                         break
 
-                nodes.append(PackageNode(
-                    name=req.name,
-                    normalized_name=norm,
-                    version=version,
-                    source=SourceAdapter.requirements.value,
-                    requested=True,
-                    depth=0,
-                ))
+                nodes.append(
+                    PackageNode(
+                        name=req.name,
+                        normalized_name=norm,
+                        version=version,
+                        source=SourceAdapter.requirements.value,
+                        requested=True,
+                        depth=0,
+                    )
+                )
 
         return DependencyGraph(
             nodes=nodes,

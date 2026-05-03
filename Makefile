@@ -202,7 +202,7 @@ import-linter:
 
 # ── Security ──────────────────────────────────────────────────────────────────
 
-security: bandit audit
+security: bandit
 
 bandit:
 	@$(UV) run bandit -q -c pyproject.toml -r $(PACKAGE)

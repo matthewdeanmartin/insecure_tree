@@ -1,4 +1,5 @@
 """Tests for GitHub URL extraction and confidence scoring."""
+
 from typing import Any
 
 import pytest
@@ -6,21 +7,24 @@ import pytest
 from insecure_tree.metadata.github_urls import _parse_github, extract_github_candidates
 from insecure_tree.models import ConfidenceLevel, PackageMetadata
 
-
 # ---------------------------------------------------------------------------
 # _parse_github
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("url,expected", [
-    ("https://github.com/psf/requests", ("psf", "requests")),
-    ("https://github.com/psf/requests.git", ("psf", "requests")),
-    ("https://github.com/psf/requests/", ("psf", "requests")),
-    ("git+https://github.com/psf/requests.git", ("psf", "requests")),
-    ("git@github.com:psf/requests.git", ("psf", "requests")),
-    ("ssh://git@github.com/psf/requests.git", ("psf", "requests")),
-    ("https://example.com/psf/requests", None),
-    ("https://gist.github.com/abc/def", None),
-])
+
+@pytest.mark.parametrize(
+    "url,expected",
+    [
+        ("https://github.com/psf/requests", ("psf", "requests")),
+        ("https://github.com/psf/requests.git", ("psf", "requests")),
+        ("https://github.com/psf/requests/", ("psf", "requests")),
+        ("git+https://github.com/psf/requests.git", ("psf", "requests")),
+        ("git@github.com:psf/requests.git", ("psf", "requests")),
+        ("ssh://git@github.com/psf/requests.git", ("psf", "requests")),
+        ("https://example.com/psf/requests", None),
+        ("https://gist.github.com/abc/def", None),
+    ],
+)
 def test_parse_github(url: str, expected: tuple[str, str] | None) -> None:
     assert _parse_github(url) == expected
 
@@ -28,6 +32,7 @@ def test_parse_github(url: str, expected: tuple[str, str] | None) -> None:
 # ---------------------------------------------------------------------------
 # extract_github_candidates
 # ---------------------------------------------------------------------------
+
 
 def _meta(**kwargs: Any) -> PackageMetadata:
     return PackageMetadata(index_url="", metadata_source="test").model_copy(update=kwargs)

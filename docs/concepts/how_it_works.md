@@ -27,8 +27,8 @@ An *adapter* builds the dependency graph as a set of `PackageNode` objects and `
 For each package node, insecure-tree fetches metadata from:
 
 1. Local installed distribution metadata (via `importlib.metadata`).
-2. PyPI JSON API for the exact version (`https://pypi.org/pypi/{name}/{version}/json`).
-3. PyPI JSON API latest release, as a fallback only.
+1. PyPI JSON API for the exact version (`https://pypi.org/pypi/{name}/{version}/json`).
+1. PyPI JSON API latest release, as a fallback only.
 
 Results are cached in a local SQLite database with a configurable TTL (default: 7 days).
 
@@ -50,9 +50,9 @@ The highest-confidence candidate becomes the `selected_repo` for a package. See 
 insecure-tree contacts the GitHub REST API to:
 
 1. Get repository metadata (default branch, archived status).
-2. Get the HEAD commit SHA for the default branch.
-3. List `.github/workflows/*.yml` and `*.yaml` files.
-4. Download each file's content.
+1. Get the HEAD commit SHA for the default branch.
+1. List `.github/workflows/*.yml` and `*.yaml` files.
+1. Download each file's content.
 
 Files are written to a temporary directory structured as `owner__repo/.github/workflows/*.yml`, which zizmor can scan as if it were a real repository checkout.
 

@@ -78,6 +78,6 @@ insecure-tree scan --offline
 Start with informational mode and tighten thresholds over time:
 
 1. Run `--fail-on never` — collect data, do not break builds.
-2. Review `insecure-tree.html`, add `ignore` rules for accepted risks.
-3. Switch to `--fail-on warning`, fix or suppress remaining warnings.
-4. Switch to `--fail-on error` for long-term CI enforcement.
+1. Review `insecure-tree.html`, add `ignore` rules for accepted risks.
+1. Switch to `--fail-on warning`, fix or suppress remaining warnings.
+1. Switch to `--fail-on error` for long-term CI enforcement.

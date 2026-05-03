@@ -1,4 +1,5 @@
 """Tests for the SQLite cache."""
+
 import time
 
 import pytest

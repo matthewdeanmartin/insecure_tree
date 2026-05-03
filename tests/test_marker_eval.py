@@ -1,4 +1,5 @@
 """Tests for marker evaluation."""
+
 from insecure_tree.marker_eval import evaluate_marker
 
 
