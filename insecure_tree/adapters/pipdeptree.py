@@ -1,10 +1,11 @@
-"""Adapter for `pipdeptree --json-tree`."""
+"""Adapter for `python -m pipdeptree --json-tree`."""
 
 from __future__ import annotations
 
+from importlib.util import find_spec
 import json
 import logging
-import shutil
+import sys
 from typing import Any
 
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
@@ -49,10 +50,11 @@ def _walk(
 
 class PipdeptreeAdapter(BaseAdapter):
     def detect(self, options: AdapterOptions) -> bool:
-        return shutil.which("pipdeptree") is not None
+        return find_spec("pipdeptree") is not None
 
     def fetch(self, options: AdapterOptions) -> DependencyGraph:
-        cmd = ["pipdeptree", "--json-tree"]
+        python = options.python or sys.executable
+        cmd = [python, "-m", "pipdeptree", "--json-tree"]
 
         try:
             _, stdout, _ = run_subprocess(cmd, cwd=options.project_path, timeout=options.timeout)

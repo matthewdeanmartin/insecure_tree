@@ -19,7 +19,7 @@ ABOUT_FILE := insecure_tree/__about__.py
 	lint lint-check ruff-fix ruff-check pylint pylint-tests pylint-spelling \
 	spell \
 	docs-check docs-check-docstrings docs-check-links docs-check-pydoctest griffe \
-	build-docs \
+	build-docs build-pages-report \
 	dead-code vulture deadcode \
 	explore refurb crosshair deptry import-linter \
 	security bandit audit \
@@ -61,6 +61,7 @@ help:
 	@echo "  docs-check-links       linkcheckMarkdown"
 	@echo "  griffe                 griffe API surface check (advisory)"
 	@echo "  build-docs             Build mkdocs documentation"
+	@echo "  build-pages-report     Build the checked-in GitHub Pages self-scan report"
 	@echo ""
 	@echo "  dead-code              vulture + deadcode (advisory, non-blocking)"
 	@echo ""
@@ -164,6 +165,9 @@ griffe:
 
 build-docs:
 	@$(UV) run mkdocs build
+
+build-pages-report:
+	@$(UV) run python scripts/build_pages_report.py
 
 # ── Dead code analysis (advisory — non-blocking) ─────────────────────────────
 

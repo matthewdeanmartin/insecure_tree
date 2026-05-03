@@ -35,6 +35,18 @@ insecure-tree scan
 
 Reports land in `./insecure-tree-report/` as `insecure-tree.txt`, `insecure-tree.html`, and `insecure-tree.json`.
 
+## GitHub Pages self-scan
+
+The checked-in GitHub Pages report lives in `pages/`, not `docs/`, so it does not interfere with the MkDocs / Read the Docs site.
+
+Regenerate it with:
+
+```bash
+uv run make build-pages-report
+```
+
+The `Publish GitHub Pages` workflow rebuilds that self-scan report and deploys `pages/index.html`.
+
 ## CI usage
 
 ```bash

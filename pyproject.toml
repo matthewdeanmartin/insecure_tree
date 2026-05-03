@@ -85,6 +85,7 @@ dev = [
     "troml-dev-status>=0.6.0",
     "pre-commit>=4.0.0",
     "pip-audit>=2.7.0",
+    "pipdeptree>=2.23.0",
     "tox>=4.0",
     "tox-uv>=1.0",
     "gha-update>=0.1.0; python_version >= '3.12'",
