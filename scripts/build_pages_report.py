@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -34,7 +35,14 @@ def _run_self_scan(repo_root: Path, output_dir: Path) -> None:
         "--output-dir",
         str(output_dir),
     ]
-    subprocess.run(command, check=True, cwd=repo_root)
+    env = dict(os.environ)
+    if not env.get("GITHUB_TOKEN"):
+        result = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=False, cwd=repo_root)
+        token = result.stdout.strip()
+        if result.returncode == 0 and token:
+            env["GITHUB_TOKEN"] = token
+
+    subprocess.run(command, check=True, cwd=repo_root, env=env)
 
 
 def build_pages_report() -> Path:

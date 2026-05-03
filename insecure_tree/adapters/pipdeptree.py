@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from importlib.util import find_spec
 import json
 import logging
 import sys
+from importlib.util import find_spec
 from typing import Any
 
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter

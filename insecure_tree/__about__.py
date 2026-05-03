@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 __title__ = "insecure_tree"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __description__ = "Audit GitHub Actions security posture of your Python dependency tree using zizmor"
 __readme__ = "README.md"
 __credits__ = [{"name": "Matthew Martin", "email": "matthewdeanmartin@gmail.com"}]

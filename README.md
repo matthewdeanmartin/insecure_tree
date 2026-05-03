@@ -2,7 +2,14 @@
 
 Audit the GitHub Actions security posture of your entire Python dependency tree.
 
-insecure-tree discovers your transitive dependencies, resolves their PyPI metadata, identifies claimed GitHub repositories, downloads workflow files, and runs [zizmor](https://github.com/woodruffw/zizmor) against each one — then produces a unified text, HTML, and JSON report showing every finding and which package it came from.
+insecure-tree discovers your transitive dependencies, resolves their PyPI metadata, identifies claimed GitHub
+repositories, downloads workflow files, and runs [zizmor](https://github.com/woodruffw/zizmor) against each one — then
+produces a unified text, HTML, and JSON report showing every finding and which package it came from.
+
+## Demo page
+
+[Demo](https://matthewdeanmartin.github.io/insecure_tree/) of scan against insecure-tree's own dependencies (including
+development dependencies)
 
 ## Installation
 
@@ -37,7 +44,8 @@ Reports land in `./insecure-tree-report/` as `insecure-tree.txt`, `insecure-tree
 
 ## GitHub Pages self-scan
 
-The checked-in GitHub Pages report lives in `pages/`, not `docs/`, so it does not interfere with the MkDocs / Read the Docs site.
+The checked-in GitHub Pages report lives in `pages/`, not `docs/`, so it does not interfere with the MkDocs / Read the
+Docs site.
 
 Regenerate it with:
 
@@ -58,18 +66,19 @@ insecure-tree scan \
   --output-dir artifacts/insecure-tree
 ```
 
-Exit codes: `0` clean, `1` findings above threshold, `2` config error, `3` infrastructure error, `4` partial scan failure.
+Exit codes: `0` clean, `1` findings above threshold, `2` config error, `3` infrastructure error, `4` partial scan
+failure.
 
 ## All commands
 
-| Command | Description |
-|---------|-------------|
-| `insecure-tree scan` | Run the full audit pipeline |
-| `insecure-tree graph` | Emit the dependency graph as JSON or text |
-| `insecure-tree metadata PACKAGE` | Inspect PyPI metadata and GitHub candidates for one package |
-| `insecure-tree report --input FILE` | Re-render a report from a saved JSON file |
-| `insecure-tree cache dir` | Print the cache directory path |
-| `insecure-tree cache clean` | Remove expired cache entries |
+| Command                             | Description                                                 |
+|-------------------------------------|-------------------------------------------------------------|
+| `insecure-tree scan`                | Run the full audit pipeline                                 |
+| `insecure-tree graph`               | Emit the dependency graph as JSON or text                   |
+| `insecure-tree metadata PACKAGE`    | Inspect PyPI metadata and GitHub candidates for one package |
+| `insecure-tree report --input FILE` | Re-render a report from a saved JSON file                   |
+| `insecure-tree cache dir`           | Print the cache directory path                              |
+| `insecure-tree cache clean`         | Remove expired cache entries                                |
 
 ## Configuration
 
