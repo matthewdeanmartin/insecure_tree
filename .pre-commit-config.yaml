@@ -1,0 +1,61 @@
+---
+ci:
+  autoupdate_schedule: quarterly
+  autofix_commit_msg: |
+    [pre-commit.ci] Apply automatic pre-commit fixes
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      # check-yaml disabled: uncomment if you have no !reference / !reset tags
+      # - id: check-yaml
+      - id: check-builtin-literals
+      - id: fix-byte-order-marker
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: forbid-new-submodules
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.3.3
+    hooks:
+      - id: autoflake
+        args:
+          - --in-place
+          - --recursive
+          - --expand-star-imports
+          - --remove-duplicate-keys
+          - --remove-unused-variables
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.10
+    hooks:
+      - id: ruff
+        args: ["--config", "pyproject.toml", "--fix"]
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-use-type-annotations
+      - id: python-no-log-warn
+      - id: text-unicode-replacement-char
+
+# Uncomment to auto-format Python with black on commit.
+# black conflicts with some other hooks; test before enabling.
+#  - repo: https://github.com/psf/black
+#    rev: 25.1.0
+#    hooks:
+#      - id: black
+
+# Uncomment to auto-format Markdown on commit.
+#  - repo: https://github.com/executablebooks/mdformat
+#    rev: 0.7.22
+#    hooks:
+#      - id: mdformat
+#        additional_dependencies:
+#          - mdformat-gfm
