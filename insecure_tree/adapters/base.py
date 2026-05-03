@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
 
 from insecure_tree.models import DependencyGraph
 
@@ -13,12 +12,12 @@ from insecure_tree.models import DependencyGraph
 @dataclass
 class AdapterOptions:
     project_path: Path = field(default_factory=Path)
-    python: Optional[str] = None
-    depth: Optional[int] = None
+    python: str | None = None
+    depth: int | None = None
     include_dev: bool = True
-    extras: List[str] = field(default_factory=list)
-    groups: List[str] = field(default_factory=list)
-    requirements_files: List[str] = field(default_factory=list)
+    extras: list[str] = field(default_factory=list)
+    groups: list[str] = field(default_factory=list)
+    requirements_files: list[str] = field(default_factory=list)
     timeout: float = 60.0
 
 

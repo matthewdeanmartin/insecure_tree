@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
-import subprocess
+import subprocess  # nosec B404
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ _TOKEN_RE = re.compile(r"gh[ps]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{82,}")
 
 
 class SubprocessError(Exception):
-    def __init__(self, cmd: List[str], returncode: int, stderr: str) -> None:
+    def __init__(self, cmd: list[str], returncode: int, stderr: str) -> None:
         self.cmd = cmd
         self.returncode = returncode
         self.stderr = stderr
@@ -26,12 +25,13 @@ def _redact(s: str) -> str:
 
 
 def run_subprocess(
-    cmd: List[str],
+    cmd: list[str],
     *,
-    cwd: Optional[Path] = None,
+    cwd: Path | None = None,
     timeout: float = 60.0,
-    env: Optional[Dict[str, str]] = None,
-) -> Tuple[int, str, str]:
+    env: dict[str, str] | None = None,
+    check: bool = True,
+) -> tuple[int, str, str]:
     """Run a subprocess and return (returncode, stdout, stderr).
 
     Raises SubprocessError on non-zero exit.  Never uses shell=True.
@@ -39,19 +39,23 @@ def run_subprocess(
     safe_cmd = [_redact(arg) for arg in cmd]
     log.debug("run: %s", " ".join(safe_cmd))
 
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        cwd=cwd,
-        timeout=timeout,
-        env=env,
-        shell=False,
-    )
+    try:
+        result = subprocess.run(  # nosec B603
+            cmd,
+            capture_output=True,
+            check=False,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=cwd,
+            timeout=timeout,
+            env=env,
+            shell=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(f"Command {cmd[0]!r} timed out after {timeout}s") from exc
 
-    if result.returncode != 0:
+    if check and result.returncode != 0:
         raise SubprocessError(cmd, result.returncode, _redact(result.stderr))
 
     return result.returncode, result.stdout, result.stderr

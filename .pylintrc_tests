@@ -1,6 +1,6 @@
 [MASTER]
 jobs=1
-py-version=3.9
+py-version=3.10
 
 [MESSAGES CONTROL]
 disable=
@@ -23,7 +23,6 @@ disable=
     missing-module-docstring,
     missing-class-docstring,
     missing-function-docstring,
-    no-self-use,
     attribute-defined-outside-init,
     invalid-name
 

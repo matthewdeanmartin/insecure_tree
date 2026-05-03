@@ -1,28 +1,16 @@
-# Insecure Tree
+# insecure-tree
 
-<!-- TODO (generated from template — delete this block once done)
-  - [ ] Replace this description with a real one-paragraph summary
-  - [ ] Update pyproject.toml [project] keywords with real search terms
-  - [ ] Update pyproject.toml classifiers Development Status (3-Alpha → 4-Beta → 5-Production)
-  - [ ] Update pyproject.toml description (shown on PyPI)
-  - [ ] Add a PyPI badge: https://badge.fury.io/py/insecure_tree
-  - [ ] Add a CI badge from your GitHub Actions build.yml
-  - [ ] Fill in docs/overview/README.md with a real project overview
-  - [ ] Add real subcommands to insecure_tree/cli.py and update scripts/basic_checks.sh
-  - [ ] Register project on Read the Docs and point it at mkdocs.yml
-  - [ ] Set up PyPI OIDC trusted publishing (no token needed) for publish_to_pypi.yml
-  - [ ] Run `make pre-commit-install` to install git hooks
-  - [ ] Run `make gha-upgrade` after first push to pin GHA action SHAs
-  - [ ] Add project-specific words to private_dictionary.txt
-  - [ ] Update SECURITY.md scope section with what's actually in scope for this project
-  - [ ] Update CHANGELOG.md 0.1.0 entry with real release notes
--->
+Audit the GitHub Actions security posture of your entire Python dependency tree.
 
-Find zizmor flaws in your dependency tree
+insecure-tree discovers your transitive dependencies, resolves their PyPI metadata, identifies claimed GitHub repositories, downloads workflow files, and runs [zizmor](https://github.com/woodruffw/zizmor) against each one — then produces a unified text, HTML, and JSON report showing every finding and which package it came from.
 
 ## Installation
 
 ```bash
+# Install zizmor first (required)
+pip install zizmor
+
+# Install insecure-tree
 pipx install insecure_tree
 ```
 
@@ -32,11 +20,78 @@ Or with pip:
 pip install insecure_tree
 ```
 
-## Usage
+## Quick start
 
 ```bash
-insecure_tree --help
+# Scan a uv project
+insecure-tree scan --source uv --project .
+
+# Scan the active virtualenv
+insecure-tree scan --source pip-inspect
+
+# Auto-detect the best source
+insecure-tree scan
 ```
+
+Reports land in `./insecure-tree-report/` as `insecure-tree.txt`, `insecure-tree.html`, and `insecure-tree.json`.
+
+## CI usage
+
+```bash
+insecure-tree scan \
+  --source auto \
+  --format text \
+  --format html \
+  --fail-on error \
+  --output-dir artifacts/insecure-tree
+```
+
+Exit codes: `0` clean, `1` findings above threshold, `2` config error, `3` infrastructure error, `4` partial scan failure.
+
+## All commands
+
+| Command | Description |
+|---------|-------------|
+| `insecure-tree scan` | Run the full audit pipeline |
+| `insecure-tree graph` | Emit the dependency graph as JSON or text |
+| `insecure-tree metadata PACKAGE` | Inspect PyPI metadata and GitHub candidates for one package |
+| `insecure-tree report --input FILE` | Re-render a report from a saved JSON file |
+| `insecure-tree cache dir` | Print the cache directory path |
+| `insecure-tree cache clean` | Remove expired cache entries |
+
+## Configuration
+
+Configuration is read from `pyproject.toml` under `[tool.insecure-tree]` or from `insecure-tree.toml`:
+
+```toml
+[tool.insecure-tree]
+source = "auto"
+fail_on = "never"
+report_min_severity = "note"
+
+[tool.insecure-tree.github]
+token_env = "GITHUB_TOKEN"
+
+[tool.insecure-tree.repo_overrides]
+"Pillow" = "https://github.com/python-pillow/Pillow"
+
+[[tool.insecure-tree.ignore]]
+package = "some-package"
+rule = "excessive-permissions"
+reason = "Accepted risk — only runs on release branches."
+expires = "2026-12-01"
+```
+
+## Documentation
+
+Full documentation is at [insecure-tree.readthedocs.io](https://insecure_tree.readthedocs.io/en/latest/).
+
+- [Installation](https://insecure_tree.readthedocs.io/en/latest/installation/)
+- [Quick Start](https://insecure_tree.readthedocs.io/en/latest/usage/quickstart/)
+- [CLI Reference](https://insecure_tree.readthedocs.io/en/latest/usage/cli/)
+- [Configuration](https://insecure_tree.readthedocs.io/en/latest/usage/configuration/)
+- [How It Works](https://insecure_tree.readthedocs.io/en/latest/concepts/how_it_works/)
+- [CI Integration](https://insecure_tree.readthedocs.io/en/latest/usage/ci/)
 
 ## Contributing
 

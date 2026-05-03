@@ -9,7 +9,7 @@ import sqlite3
 import threading
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 log = logging.getLogger(__name__)
 
@@ -45,13 +45,13 @@ class Cache:
     )
     """
 
-    def __init__(self, path: Optional[Path] = None) -> None:
+    def __init__(self, path: Path | None = None) -> None:
         if path is None:
             path = platform_cache_dir() / "cache.db"
         path.parent.mkdir(parents=True, exist_ok=True)
         self._path = path
         self._lock = threading.Lock()
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._init_db()
 
     def _connect(self) -> sqlite3.Connection:
@@ -74,7 +74,7 @@ class Cache:
     def _hash(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
 
-    def get(self, domain: str, key: str) -> Optional[str]:
+    def get(self, domain: str, key: str) -> str | None:
         """Return cached value or None if missing/expired."""
         try:
             with self._lock:
@@ -109,7 +109,7 @@ class Cache:
     def put_json(self, domain: str, key: str, value: object, ttl_seconds: int) -> None:
         self.put(domain, key, json.dumps(value), ttl_seconds)
 
-    def get_json(self, domain: str, key: str) -> Optional[object]:
+    def get_json(self, domain: str, key: str) -> Any | None:
         raw = self.get(domain, key)
         if raw is None:
             return None

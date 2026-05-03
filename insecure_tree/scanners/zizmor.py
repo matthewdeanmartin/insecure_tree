@@ -6,12 +6,12 @@ import asyncio
 import json
 import logging
 import shutil
-import subprocess
 from pathlib import Path
-from typing import List, Optional
+from typing import Any
 
 from insecure_tree.cache import Cache
 from insecure_tree.models import ScanFinding, ScanResult, ScanStatus
+from insecure_tree.subprocess import SubprocessError, run_subprocess
 
 log = logging.getLogger(__name__)
 
@@ -20,22 +20,19 @@ class ScanInfraError(Exception):
     pass
 
 
-def _get_zizmor_version(zizmor_bin: str) -> Optional[str]:
+def _get_zizmor_version(zizmor_bin: str) -> str | None:
     try:
-        result = subprocess.run(
-            [zizmor_bin, "--version"],
-            capture_output=True, text=True, timeout=10, encoding="utf-8", errors="replace",
-        )
-        line = (result.stdout or result.stderr or "").strip()
-        # "zizmor 1.24.1" or just the version
+        _, stdout, stderr = run_subprocess([zizmor_bin, "--version"], timeout=10)
+        line = (stdout or stderr).strip()
+        # "zizmor 1.24.1" or just the version.
         parts = line.split()
         return parts[-1] if parts else None
-    except Exception:
+    except (SubprocessError, OSError):
         return None
 
 
-def _parse_zizmor_json(raw: dict, owner: str, repo: str, commit_sha: str) -> List[ScanFinding]:
-    findings = []
+def _parse_zizmor_json(raw: dict[str, Any], owner: str, repo: str, commit_sha: str) -> list[ScanFinding]:
+    findings: list[ScanFinding] = []
     # zizmor SARIF-like JSON: {"runs": [{"results": [...]}]}
     runs = raw.get("runs", [])
     for run in runs:
@@ -89,14 +86,14 @@ def _parse_zizmor_json(raw: dict, owner: str, repo: str, commit_sha: str) -> Lis
     return findings
 
 
-async def run_zizmor(
+async def run_zizmor(  # pylint: disable=too-many-return-statements
     workflow_dir: Path,
     *,
     owner: str,
     repo: str,
     commit_sha: str,
     zizmor_bin: str = "zizmor",
-    extra_args: Optional[List[str]] = None,
+    extra_args: list[str] | None = None,
     cache: Cache,
     timeout: float = 120.0,
 ) -> ScanResult:
@@ -124,26 +121,24 @@ async def run_zizmor(
 
     try:
         proc = await asyncio.to_thread(
-            subprocess.run,
+            run_subprocess,
             cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
             timeout=timeout,
+            check=False,
         )
-    except subprocess.TimeoutExpired:
+    except TimeoutError:
         return ScanResult(status=ScanStatus.zizmor_failed, error_message="zizmor timed out")
     except Exception as exc:
         return ScanResult(status=ScanStatus.zizmor_failed, error_message=str(exc))
 
     # zizmor exits non-zero when findings exist; that's expected
-    raw_output = proc.stdout or proc.stderr or ""
+    returncode, stdout, stderr = proc
+    raw_output = stdout or stderr or ""
     if not raw_output.strip():
         return ScanResult(
             status=ScanStatus.zizmor_failed,
             zizmor_version=zizmor_version,
-            error_message=f"zizmor produced no output (exit {proc.returncode})",
+            error_message=f"zizmor produced no output (exit {returncode})",
         )
 
     try:
@@ -153,6 +148,12 @@ async def run_zizmor(
             status=ScanStatus.zizmor_failed,
             zizmor_version=zizmor_version,
             error_message=f"zizmor JSON parse error: {exc}",
+        )
+    if not isinstance(data, dict):
+        return ScanResult(
+            status=ScanStatus.zizmor_failed,
+            zizmor_version=zizmor_version,
+            error_message="zizmor returned an unexpected JSON payload",
         )
 
     findings = _parse_zizmor_json(data, owner, repo, commit_sha)
@@ -169,10 +170,10 @@ def _build_result(
     status: ScanStatus,
     version: str,
     repo_ref: str,
-    findings: List[ScanFinding],
+    findings: list[ScanFinding],
     workflow_count: int,
 ) -> ScanResult:
-    by_sev: dict = {}
+    by_sev: dict[str, int] = {}
     for f in findings:
         by_sev[f.severity] = by_sev.get(f.severity, 0) + 1
     return ScanResult(

@@ -1,8 +1,8 @@
 ---
-site_name: insecure_tree
+site_name: insecure-tree
 site_url: https://insecure_tree.readthedocs.io/
 site_author: Matthew Martin <matthewdeanmartin@gmail.com>
-site_description: Find zizmor flaws in your dependency tree
+site_description: Audit GitHub Actions security posture of your Python dependency tree using zizmor
 repo_url: https://github.com/matthewdeanmartin/insecure_tree
 theme:
   name: readthedocs
@@ -14,11 +14,19 @@ markdown_extensions:
   - toc:
       permalink: true
 nav:
-  - Overview:
-      - Readme.md: overview/README.md
+  - Home: index.md
+  - Overview: overview/README.md
   - Installation: installation.md
   - Usage:
       - Quick Start: usage/quickstart.md
+      - CLI Reference: usage/cli.md
+      - Configuration: usage/configuration.md
+      - CI Integration: usage/ci.md
+  - Concepts:
+      - How It Works: concepts/how_it_works.md
+      - Dependency Sources: concepts/sources.md
+      - GitHub URL Extraction: concepts/github_urls.md
+      - Reports: concepts/reports.md
   - Contributing: extending/CONTRIBUTING.md
   - Change Log: CHANGELOG.md
 validation:

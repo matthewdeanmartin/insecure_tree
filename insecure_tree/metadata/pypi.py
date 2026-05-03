@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
-from typing import Optional
+from typing import Any
 
 import httpx
 
@@ -16,17 +15,25 @@ log = logging.getLogger(__name__)
 _PYPI_BASE = "https://pypi.org/pypi"
 
 
-def _parse_pypi_response(data: dict, version: Optional[str]) -> Optional[PackageMetadata]:
+def _parse_pypi_response(data: dict[str, Any]) -> PackageMetadata | None:
     try:
         info = data["info"]
-        project_urls: dict = info.get("project_urls") or {}
-        requires_dist = info.get("requires_dist") or []
+        if not isinstance(info, dict):
+            return None
+        project_urls_raw = info.get("project_urls") or {}
+        project_urls = (
+            {str(key): str(value) for key, value in project_urls_raw.items() if value}
+            if isinstance(project_urls_raw, dict)
+            else {}
+        )
+        requires_dist_raw = info.get("requires_dist") or []
+        requires_dist = [str(item) for item in requires_dist_raw] if isinstance(requires_dist_raw, list) else []
         return PackageMetadata(
             index_url=f"{_PYPI_BASE}/{info['name']}/{info['version']}/json",
             metadata_source="pypi-json",
             summary=info.get("summary") or "",
             home_page=info.get("home_page") or None,
-            project_urls={k: v for k, v in project_urls.items() if v},
+            project_urls=project_urls,
             requires_dist=requires_dist,
             download_url=info.get("download_url") or None,
             docs_url=info.get("docs_url") or None,
@@ -39,23 +46,20 @@ def _parse_pypi_response(data: dict, version: Optional[str]) -> Optional[Package
 
 async def fetch_pypi_metadata(
     name: str,
-    version: Optional[str],
+    version: str | None,
     *,
     session: httpx.AsyncClient,
     cache: Cache,
     ttl: int,
-) -> Optional[PackageMetadata]:
+) -> PackageMetadata | None:
     """Fetch metadata from PyPI JSON API with caching."""
     cache_key = f"{name}=={version}" if version else f"{name}==latest"
 
     cached = cache.get_json("pypi", cache_key)
     if cached is not None and isinstance(cached, dict):
-        return _parse_pypi_response(cached, version)
+        return _parse_pypi_response(cached)
 
-    if version:
-        url = f"{_PYPI_BASE}/{name}/{version}/json"
-    else:
-        url = f"{_PYPI_BASE}/{name}/json"
+    url = f"{_PYPI_BASE}/{name}/{version}/json" if version else f"{_PYPI_BASE}/{name}/json"
 
     try:
         resp = await session.get(url)
@@ -72,4 +76,6 @@ async def fetch_pypi_metadata(
         return None
 
     cache.put_json("pypi", cache_key, data, ttl)
-    return _parse_pypi_response(data, version)
+    if not isinstance(data, dict):
+        return None
+    return _parse_pypi_response(data)

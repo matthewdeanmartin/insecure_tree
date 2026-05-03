@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -20,14 +20,16 @@ from insecure_tree.models import (
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # type: ignore[no-redef]
+    import tomli as tomllib
 
 
 class Config(BaseModel):
     source: SourceAdapter = SourceAdapter.auto
     project: str = "."
     output_dir: str = "insecure-tree-report"
-    formats: List[ReportFormat] = Field(default_factory=lambda: [ReportFormat.text, ReportFormat.html, ReportFormat.json])
+    formats: list[ReportFormat] = Field(
+        default_factory=lambda: [ReportFormat.text, ReportFormat.html, ReportFormat.json]
+    )
     fail_on: str = "never"
     report_min_severity: str = "note"
     repo_fetch: FetchMode = FetchMode.api
@@ -42,44 +44,46 @@ class Config(BaseModel):
     no_clone: bool = False
     strict: bool = False
     fail_on_partial: bool = False
-    depth: Optional[int] = None
+    depth: int | None = None
     include_dev: bool = True
     timeout: float = 30.0
-    python: Optional[str] = None
-    requirements: List[str] = Field(default_factory=list)
+    python: str | None = None
+    requirements: list[str] = Field(default_factory=list)
     github: GitHubConfig = Field(default_factory=GitHubConfig)
     zizmor: ZizmorphConfig = Field(default_factory=ZizmorphConfig)
-    ignore: List[IgnoreRule] = Field(default_factory=list)
-    repo_overrides: Dict[str, str] = Field(default_factory=dict)
+    ignore: list[IgnoreRule] = Field(default_factory=list)
+    repo_overrides: dict[str, str] = Field(default_factory=dict)
 
 
 def _parse_ttl(value: object) -> int:
     """Convert a TTL string like '7d', '2h', '30m' to seconds, or pass int through."""
     if isinstance(value, int):
         return value
+    if isinstance(value, float):
+        return int(value)
     if isinstance(value, str):
         units = {"d": 86400, "h": 3600, "m": 60, "s": 1}
         for suffix, mult in units.items():
             if value.endswith(suffix):
                 return int(value[:-1]) * mult
         return int(value)
-    return int(value)  # type: ignore[arg-type]
+    raise TypeError(f"Unsupported TTL value: {value!r}")
 
 
 def load_config(project_path: Path) -> Config:
     """Load config from pyproject.toml or insecure-tree.toml."""
-    data: dict = {}
+    data: dict[str, Any] = {}
 
     pyproject = project_path / "pyproject.toml"
     if pyproject.exists():
         with open(pyproject, "rb") as f:
-            raw = tomllib.load(f)
+            raw: dict[str, Any] = tomllib.load(f)
         data = raw.get("tool", {}).get("insecure-tree", {})
 
     toml_file = project_path / "insecure-tree.toml"
     if toml_file.exists():
         with open(toml_file, "rb") as f:
-            raw2 = tomllib.load(f)
+            raw2: dict[str, Any] = tomllib.load(f)
         data.update(raw2.get("tool", {}).get("insecure-tree", raw2))
 
     for ttl_field in ("metadata_ttl", "repo_ttl"):

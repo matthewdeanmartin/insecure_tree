@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
 
 from packaging.markers import Marker, default_environment
 
 
-def default_env() -> Dict[str, str]:
+def default_env() -> dict[str, str]:
     """Return the current environment marker dict."""
-    return default_environment()
+    return {key: str(value) for key, value in default_environment().items()}
 
 
-def evaluate_marker(marker_str: str, env: Optional[Dict[str, str]] = None) -> bool:
+def evaluate_marker(marker_str: str, env: dict[str, str] | None = None) -> bool:
     """Evaluate a PEP 508 marker string against env (defaults to current env)."""
     if not marker_str:
         return True

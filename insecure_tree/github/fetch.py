@@ -6,8 +6,6 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
-
 from insecure_tree.cache import Cache
 from insecure_tree.github.client import GitHubAPIError, GitHubClient
 
@@ -19,14 +17,14 @@ class FetchResult:
     owner: str
     repo: str
     status: str
-    workflow_dir: Optional[Path] = None
+    workflow_dir: Path | None = None
     commit_sha: str = ""
     default_branch: str = ""
-    workflow_paths: List[str] = field(default_factory=list)
+    workflow_paths: list[str] = field(default_factory=list)
     error_message: str = ""
 
 
-async def fetch_workflows(
+async def fetch_workflows(  # pylint: disable=too-many-return-statements
     owner: str,
     repo: str,
     *,
@@ -117,12 +115,18 @@ async def fetch_workflows(
         )
 
     # Download each workflow file
-    fetched = []
+    fetched: list[dict[str, str]] = []
     for wf in workflow_files:
         wf_path = wf.get("path", "")
         try:
             content = await client.get_file_content(owner, repo, wf_path, commit_sha)
-            fetched.append({"path": wf_path, "name": wf.get("name", ""), "content": content.decode("utf-8", errors="replace")})
+            fetched.append(
+                {
+                    "path": wf_path,
+                    "name": wf.get("name", ""),
+                    "content": content.decode("utf-8", errors="replace"),
+                }
+            )
         except Exception as exc:
             log.warning("Failed to fetch %s/%s %s: %s", owner, repo, wf_path, exc)
 
@@ -147,7 +151,7 @@ async def fetch_workflows(
     )
 
 
-def _write_workflows(owner: str, repo: str, workflows: list, tmp_base: Path) -> Path:
+def _write_workflows(owner: str, repo: str, workflows: list[dict[str, str]], tmp_base: Path) -> Path:
     safe_name = f"{owner}__{repo}"
     dest = tmp_base / safe_name / ".github" / "workflows"
     dest.mkdir(parents=True, exist_ok=True)

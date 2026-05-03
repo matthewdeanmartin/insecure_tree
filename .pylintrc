@@ -1,6 +1,6 @@
 [MASTER]
 jobs=1
-py-version=3.9
+py-version=3.10
 
 [MESSAGES CONTROL]
 disable=
@@ -15,7 +15,12 @@ disable=
     too-few-public-methods,
     duplicate-code,
     import-error,
-    logging-fstring-interpolation
+    logging-fstring-interpolation,
+    import-outside-toplevel,
+    missing-class-docstring,
+    missing-function-docstring,
+    invalid-name,
+    broad-exception-caught
 
 [FORMAT]
 max-line-length=120

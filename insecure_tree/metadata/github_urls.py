@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from insecure_tree.models import ConfidenceLevel, PackageMetadata, RepoCandidate
@@ -41,7 +40,7 @@ _REJECT_PATH_PARTS = frozenset([
 ])
 
 
-def _parse_github(raw: str) -> Optional[Tuple[str, str]]:
+def _parse_github(raw: str) -> tuple[str, str] | None:
     """Return (owner, repo) from a raw GitHub URL/string, or None."""
     raw = raw.strip()
     for pattern in (_GIT_PLUS_RE, _GIT_SSH_URL_RE, _GIT_SSH_RE, _GITHUB_RE):
@@ -53,7 +52,7 @@ def _parse_github(raw: str) -> Optional[Tuple[str, str]]:
     return None
 
 
-def _is_rejected_path(url: str, owner: str, repo: str) -> bool:
+def _is_rejected_path(url: str, _owner: str, _repo: str) -> bool:
     """Return True if the URL points to a sub-page rather than a repo root."""
     try:
         parsed = urlparse(url)
@@ -75,17 +74,14 @@ def _is_rejected_path(url: str, owner: str, repo: str) -> bool:
         return True
 
     # Profile page: github.com/owner with no repo
-    if len(parts) == 1:
-        return True
-
-    return False
+    return len(parts) == 1
 
 
 def _normalize_clone_url(owner: str, repo: str) -> str:
     return f"https://github.com/{owner}/{repo}.git"
 
 
-def _score_label(label: str) -> Tuple[ConfidenceLevel, str]:
+def _score_label(label: str) -> tuple[ConfidenceLevel, str]:
     """Map a project_urls label to a confidence level."""
     low = label.lower().strip()
     if low in _SOURCE_LABELS:
@@ -104,7 +100,7 @@ def _candidate_from_url(
     source_field: str,
     confidence: ConfidenceLevel,
     reason: str,
-) -> Optional[RepoCandidate]:
+) -> RepoCandidate | None:
     parsed = _parse_github(raw)
     if parsed is None:
         return None
@@ -122,11 +118,11 @@ def _candidate_from_url(
     )
 
 
-def extract_github_candidates(metadata: PackageMetadata) -> List[RepoCandidate]:
+def extract_github_candidates(metadata: PackageMetadata) -> list[RepoCandidate]:
     """Extract and rank GitHub repo candidates from package metadata."""
-    seen: Dict[str, RepoCandidate] = {}
+    seen: dict[str, RepoCandidate] = {}
 
-    def add(candidate: Optional[RepoCandidate]) -> None:
+    def add(candidate: RepoCandidate | None) -> None:
         if candidate is None or candidate.confidence == ConfidenceLevel.rejected:
             return
         key = f"{candidate.owner}/{candidate.repo}".lower()
@@ -200,6 +196,6 @@ def _confidence_rank(c: ConfidenceLevel) -> int:
     return {ConfidenceLevel.high: 3, ConfidenceLevel.medium: 2, ConfidenceLevel.low: 1, ConfidenceLevel.rejected: 0}[c]
 
 
-def select_best_candidate(candidates: List[RepoCandidate]) -> Optional[RepoCandidate]:
+def select_best_candidate(candidates: list[RepoCandidate]) -> RepoCandidate | None:
     """Return the highest-confidence candidate."""
     return candidates[0] if candidates else None

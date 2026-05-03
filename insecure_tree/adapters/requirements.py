@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List
 
-from packaging.requirements import Requirement
+from packaging.requirements import InvalidRequirement, Requirement
 
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
 from insecure_tree.models import DependencyGraph, PackageNode, SourceAdapter
@@ -15,9 +14,9 @@ from insecure_tree.normalize import canonicalize
 log = logging.getLogger(__name__)
 
 
-def _find_requirements_files(project_path: Path) -> List[Path]:
+def _find_requirements_files(project_path: Path) -> list[Path]:
     patterns = ["requirements.txt", "requirements-*.txt", "requirements/*.txt"]
-    found: List[Path] = []
+    found: list[Path] = []
     for pattern in patterns:
         found.extend(sorted(project_path.glob(pattern)))
     return found
@@ -30,14 +29,14 @@ class RequirementsAdapter(BaseAdapter):
         return bool(_find_requirements_files(options.project_path))
 
     def fetch(self, options: AdapterOptions) -> DependencyGraph:
-        files: List[Path] = []
+        files: list[Path] = []
         if options.requirements_files:
             files = [Path(f) for f in options.requirements_files]
         else:
             files = _find_requirements_files(options.project_path)
 
-        nodes: List[PackageNode] = []
-        seen_norms: set = set()
+        nodes: list[PackageNode] = []
+        seen_norms: set[str] = set()
 
         for req_file in files:
             try:
@@ -52,7 +51,7 @@ class RequirementsAdapter(BaseAdapter):
                     continue
                 try:
                     req = Requirement(line)
-                except Exception:
+                except InvalidRequirement:
                     continue
                 norm = canonicalize(req.name)
                 if norm in seen_norms:

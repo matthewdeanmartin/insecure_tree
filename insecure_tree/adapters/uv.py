@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import shutil
-from typing import List, Optional
+from typing import Any
 
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
 from insecure_tree.models import DependencyGraph, GraphEdge, PackageNode, SourceAdapter
@@ -16,11 +16,11 @@ log = logging.getLogger(__name__)
 
 
 def _walk(
-    node: dict,
-    nodes: List[PackageNode],
-    edges: List[GraphEdge],
+    node: dict[str, Any],
+    nodes: list[PackageNode],
+    edges: list[GraphEdge],
     depth: int,
-    parent_key: Optional[str],
+    _parent_key: str | None,
 ) -> None:
     name = node.get("name", "")
     version = node.get("version", "")
@@ -76,9 +76,9 @@ class UvAdapter(BaseAdapter):
         except json.JSONDecodeError as exc:
             raise ValueError(f"uv tree produced invalid JSON: {exc}") from exc
 
-        nodes: List[PackageNode] = []
-        edges: List[GraphEdge] = []
-        roots: List[str] = []
+        nodes: list[PackageNode] = []
+        edges: list[GraphEdge] = []
+        roots: list[str] = []
 
         # uv tree JSON is a list of root packages
         if isinstance(raw, list):

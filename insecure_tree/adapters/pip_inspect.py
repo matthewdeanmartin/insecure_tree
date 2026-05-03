@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import shutil
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Any, cast
 
-from packaging.requirements import Requirement
+from packaging.requirements import InvalidRequirement, Requirement
 
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
 from insecure_tree.marker_eval import default_env, evaluate_marker
@@ -20,7 +20,7 @@ from insecure_tree.subprocess import SubprocessError, run_subprocess
 log = logging.getLogger(__name__)
 
 
-def _recover_partial_pip_inspect(stdout: str) -> Optional[dict]:
+def _recover_partial_pip_inspect(stdout: str) -> dict[str, Any] | None:
     """Recover valid JSON from truncated pip inspect output.
 
     pip inspect writes a JSON object where installed[] may be truncated mid-entry.
@@ -28,7 +28,6 @@ def _recover_partial_pip_inspect(stdout: str) -> Optional[dict]:
     """
     # Find the last occurrence of a pattern that ends a complete installed entry:
     # "    }," or "    }" followed by whitespace/newline
-    import re
     # Try successively truncating at the last top-level object boundary in installed[]
     s = stdout.rstrip()
     # Attempt to close the truncated JSON by finding last complete top-level "}" that
@@ -44,7 +43,9 @@ def _recover_partial_pip_inspect(stdout: str) -> Optional[dict]:
         # Try each closing suffix
         for suffix in ["\n  ]\n}", "\n  ]}", "]}", "]"]:
             try:
-                return json.loads(trimmed + suffix)
+                recovered = json.loads(trimmed + suffix)
+                if isinstance(recovered, dict):
+                    return recovered
             except json.JSONDecodeError:
                 pass
 
@@ -63,14 +64,15 @@ class PipInspectAdapter(BaseAdapter):
         cmd = [python, "-m", "pip", "inspect", "--isolated"]
 
         try:
-            import subprocess as _subprocess
             # pip inspect may exit non-zero on some platforms while still writing valid JSON.
-            proc = _subprocess.run(cmd, capture_output=True, text=True,
-                                   encoding="utf-8", errors="replace",
-                                   cwd=options.project_path, timeout=options.timeout)
-            stdout = proc.stdout
-            if not stdout.strip() and proc.returncode != 0:
-                raise SubprocessError(cmd, proc.returncode, proc.stderr)
+            returncode, stdout, stderr = run_subprocess(
+                cmd,
+                cwd=options.project_path,
+                timeout=options.timeout,
+                check=False,
+            )
+            if not stdout.strip() and returncode != 0:
+                raise SubprocessError(cmd, returncode, stderr)
         except SubprocessError:
             raise
         except Exception as exc:
@@ -87,32 +89,36 @@ class PipInspectAdapter(BaseAdapter):
             if raw is None:
                 raise ValueError(f"pip inspect produced invalid JSON and partial parse failed: {exc}") from exc
 
+        if not isinstance(raw, dict):
+            raise ValueError("pip inspect returned an unexpected JSON payload")
+
         env = default_env()
         installed = raw.get("installed", [])
 
         # Build a map of normalized_name -> (name, version, requires_dist)
-        pkg_map: Dict[str, tuple] = {}
+        pkg_map: dict[str, tuple[str, str, list[str]]] = {}
         for dist in installed:
             meta = dist.get("metadata", {})
             name = meta.get("name") or dist.get("name") or ""
             version = meta.get("version") or dist.get("version") or ""
-            requires_dist = meta.get("requires_dist") or []
+            requires_dist_raw = meta.get("requires_dist") or []
+            requires_dist = [str(item) for item in requires_dist_raw] if isinstance(requires_dist_raw, list) else []
             norm = canonicalize(name)
             pkg_map[norm] = (name, version, requires_dist)
 
-        nodes: List[PackageNode] = []
-        edges: List[GraphEdge] = []
+        nodes: list[PackageNode] = []
+        edges: list[GraphEdge] = []
 
         # Build nodes first
-        depended_on: Set[str] = set()
-        edge_list: List[tuple] = []
+        depended_on: set[str] = set()
+        edge_list: list[tuple[str, str, str, list[str], str | None]] = []
 
-        for norm, (name, version, requires_dist) in pkg_map.items():
+        for norm, (_name, version, requires_dist) in pkg_map.items():
             from_key = f"{norm}=={version}"
             for req_str in requires_dist:
                 try:
                     req = Requirement(req_str)
-                except Exception:
+                except InvalidRequirement:
                     continue
                 if req.marker and not evaluate_marker(str(req.marker), env):
                     continue
@@ -121,9 +127,11 @@ class PipInspectAdapter(BaseAdapter):
                     dep_version = pkg_map[dep_norm][1]
                     to_key = f"{dep_norm}=={dep_version}"
                     depended_on.add(dep_norm)
-                    edge_list.append((from_key, to_key, req_str, req.extras, req.marker))
+                    edge_list.append(
+                        (from_key, to_key, req_str, sorted(req.extras), str(req.marker) if req.marker else None)
+                    )
 
-        roots: List[str] = []
+        roots: list[str] = []
         for norm, (name, version, _) in pkg_map.items():
             is_root = norm not in depended_on
             pkg_key = f"{norm}=={version}"
@@ -139,16 +147,21 @@ class PipInspectAdapter(BaseAdapter):
             ))
 
         for from_key, to_key, req_str, extras, marker in edge_list:
-            edges.append(GraphEdge(
-                **{
-                    "from": from_key,
-                    "to": to_key,
-                    "requirement": req_str,
-                    "extra": ",".join(sorted(str(e) for e in extras)) if extras else None,
-                    "marker": str(marker) if marker else None,
-                    "source": SourceAdapter.pip_inspect.value,
-                }
-            ))
+            edges.append(
+                GraphEdge.model_validate(
+                    cast(
+                        dict[str, str | None],
+                        {
+                            "from": from_key,
+                            "to": to_key,
+                            "requirement": req_str,
+                            "extra": ",".join(extras) if extras else None,
+                            "marker": marker,
+                            "source": SourceAdapter.pip_inspect.value,
+                        },
+                    )
+                )
+            )
 
         return DependencyGraph(
             nodes=nodes,

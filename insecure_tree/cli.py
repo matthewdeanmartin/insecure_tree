@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import json
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import TYPE_CHECKING
+
+import httpx
 
 from insecure_tree.__about__ import __version__
 
 log = logging.getLogger("insecure_tree")
+
+if TYPE_CHECKING:
+    from insecure_tree.config import Config
 
 
 def _setup_logging(verbose: bool) -> None:
@@ -70,8 +76,8 @@ def _add_behavior_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--ignore-package", action="append", default=[], metavar="PACKAGE")
 
 
-def _build_config(args: argparse.Namespace):  # type: ignore[return]
-    from insecure_tree.config import Config, load_config
+def _build_config(args: argparse.Namespace) -> Config:
+    from insecure_tree.config import load_config
     from insecure_tree.models import FetchMode, ReportFormat, SourceAdapter
 
     project_path = Path(getattr(args, "project", ".")).resolve()
@@ -79,10 +85,8 @@ def _build_config(args: argparse.Namespace):  # type: ignore[return]
 
     # Map CLI args onto config
     source_raw = getattr(args, "source", "auto")
-    try:
+    with contextlib.suppress(ValueError):
         config = config.model_copy(update={"source": SourceAdapter(source_raw)})
-    except ValueError:
-        pass
 
     config = config.model_copy(update={"project": str(project_path)})
 
@@ -177,7 +181,6 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     formats = config.formats
     if not formats:
-        from insecure_tree.models import ReportFormat
         formats = [ReportFormat.text, ReportFormat.html, ReportFormat.json]
 
     # Always write JSON
@@ -198,7 +201,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     # Print summary to stdout
     s = report.summary
-    print(f"\ninsecure-tree scan complete")
+    print("\ninsecure-tree scan complete")
     print(f"  Packages: {s.total_packages}  GitHub repos: {s.packages_with_github}  Scanned: {s.repos_scanned}")
     findings_str = ", ".join(f"{v} {k}" for k, v in s.findings_by_severity.items() if v) or "none"
     print(f"  Findings: {findings_str}")
@@ -217,7 +220,6 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
 def cmd_graph(args: argparse.Namespace) -> int:
     from insecure_tree.adapters.base import AdapterOptions
-    from insecure_tree.models import SourceAdapter
 
     config = _build_config(args)
     project_path = Path(config.project).resolve()
@@ -248,8 +250,6 @@ def cmd_graph(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 def cmd_metadata(args: argparse.Namespace) -> int:
-    import asyncio as _asyncio
-    import httpx as _httpx
     from insecure_tree.cache import Cache
     from insecure_tree.metadata.github_urls import extract_github_candidates
     from insecure_tree.metadata.pypi import fetch_pypi_metadata
@@ -259,7 +259,7 @@ def cmd_metadata(args: argparse.Namespace) -> int:
 
     async def _run() -> None:
         cache = Cache()
-        async with _httpx.AsyncClient(timeout=30) as session:
+        async with httpx.AsyncClient(timeout=30) as session:
             meta = await fetch_pypi_metadata(package, version, session=session, cache=cache, ttl=3600)
         if meta is None:
             print(f"No metadata found for {package}", file=sys.stderr)
@@ -270,7 +270,7 @@ def cmd_metadata(args: argparse.Namespace) -> int:
         for c in candidates:
             print(f"  [{c.confidence.value}] {c.url}  (from {c.source_field})")
 
-    _asyncio.run(_run())
+    asyncio.run(_run())
     return 0
 
 
@@ -279,7 +279,7 @@ def cmd_metadata(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 
 def cmd_report(args: argparse.Namespace) -> int:
-    from insecure_tree.models import Report, ReportFormat
+    from insecure_tree.models import Report
     from insecure_tree.report.html import write_html
     from insecure_tree.report.json import write_json
     from insecure_tree.report.text import write_text

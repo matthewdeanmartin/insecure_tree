@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -58,11 +57,11 @@ class PackageMetadata(BaseModel):
     index_url: str = ""
     metadata_source: str = ""
     summary: str = ""
-    home_page: Optional[str] = None
-    project_urls: Dict[str, str] = Field(default_factory=dict)
-    requires_dist: List[str] = Field(default_factory=list)
-    download_url: Optional[str] = None
-    docs_url: Optional[str] = None
+    home_page: str | None = None
+    project_urls: dict[str, str] = Field(default_factory=dict)
+    requires_dist: list[str] = Field(default_factory=list)
+    download_url: str | None = None
+    docs_url: str | None = None
     description: str = ""
 
 
@@ -76,8 +75,8 @@ class RepoCandidate(BaseModel):
     confidence: ConfidenceLevel
     reason: str
     normalized_clone_url: str
-    default_branch: Optional[str] = None
-    archived: Optional[bool] = None
+    default_branch: str | None = None
+    archived: bool | None = None
 
 
 class ScanFinding(BaseModel):
@@ -95,14 +94,14 @@ class ScanFinding(BaseModel):
 
 class ScanResult(BaseModel):
     status: ScanStatus
-    zizmor_version: Optional[str] = None
-    repo_ref: Optional[str] = None
+    zizmor_version: str | None = None
+    repo_ref: str | None = None
     workflow_count: int = 0
     finding_count: int = 0
-    findings_by_severity: Dict[str, int] = Field(default_factory=dict)
-    findings: List[ScanFinding] = Field(default_factory=list)
-    raw_output_path: Optional[str] = None
-    error_message: Optional[str] = None
+    findings_by_severity: dict[str, int] = Field(default_factory=dict)
+    findings: list[ScanFinding] = Field(default_factory=list)
+    raw_output_path: str | None = None
+    error_message: str | None = None
 
 
 class PackageNode(BaseModel):
@@ -112,13 +111,13 @@ class PackageNode(BaseModel):
     source: str = ""
     requested: bool = False
     depth: int = 0
-    dependency_groups: List[str] = Field(default_factory=list)
-    extras: List[str] = Field(default_factory=list)
+    dependency_groups: list[str] = Field(default_factory=list)
+    extras: list[str] = Field(default_factory=list)
     markers_applied: bool = False
-    metadata: Optional[PackageMetadata] = None
-    repo_candidates: List[RepoCandidate] = Field(default_factory=list)
-    selected_repo: Optional[RepoCandidate] = None
-    scan: Optional[ScanResult] = None
+    metadata: PackageMetadata | None = None
+    repo_candidates: list[RepoCandidate] = Field(default_factory=list)
+    selected_repo: RepoCandidate | None = None
+    scan: ScanResult | None = None
 
 
 class GraphEdge(BaseModel):
@@ -127,17 +126,17 @@ class GraphEdge(BaseModel):
     from_pkg: str = Field(alias="from", serialization_alias="from")
     to: str
     requirement: str = ""
-    extra: Optional[str] = None
-    marker: Optional[str] = None
+    extra: str | None = None
+    marker: str | None = None
     source: str = ""
 
 
 class DependencyGraph(BaseModel):
-    nodes: List[PackageNode] = Field(default_factory=list)
-    edges: List[GraphEdge] = Field(default_factory=list)
+    nodes: list[PackageNode] = Field(default_factory=list)
+    edges: list[GraphEdge] = Field(default_factory=list)
     source: SourceAdapter = SourceAdapter.auto
     complete: bool = True
-    root_packages: List[str] = Field(default_factory=list)
+    root_packages: list[str] = Field(default_factory=list)
 
 
 class ReportSummary(BaseModel):
@@ -146,7 +145,7 @@ class ReportSummary(BaseModel):
     repos_scanned: int = 0
     repos_no_workflows: int = 0
     repos_with_findings: int = 0
-    findings_by_severity: Dict[str, int] = Field(default_factory=dict)
+    findings_by_severity: dict[str, int] = Field(default_factory=dict)
     skipped: int = 0
     failed: int = 0
 
@@ -156,30 +155,30 @@ class Report(BaseModel):
     source_adapter: str = ""
     scan_timestamp: str = ""
     insecure_tree_version: str = ""
-    zizmor_version: Optional[str] = None
+    zizmor_version: str | None = None
     summary: ReportSummary = Field(default_factory=ReportSummary)
-    packages: List[PackageNode] = Field(default_factory=list)
-    graph: Optional[DependencyGraph] = None
+    packages: list[PackageNode] = Field(default_factory=list)
+    graph: DependencyGraph | None = None
     has_findings_above_threshold: bool = False
     has_partial_failures: bool = False
 
 
 class GitHubConfig(BaseModel):
     token_env: str = "GITHUB_TOKEN"
-    token: Optional[str] = None
+    token: str | None = None
 
 
 class ZizmorphConfig(BaseModel):
     bin: str = "zizmor"
-    args: List[str] = Field(default_factory=list)
+    args: list[str] = Field(default_factory=list)
 
 
 class IgnoreRule(BaseModel):
-    package: Optional[str] = None
-    repo: Optional[str] = None
-    rule: Optional[str] = None
+    package: str | None = None
+    repo: str | None = None
+    rule: str | None = None
     reason: str = ""
-    expires: Optional[datetime.date] = None
+    expires: datetime.date | None = None
 
 
 class RepoOverride(BaseModel):

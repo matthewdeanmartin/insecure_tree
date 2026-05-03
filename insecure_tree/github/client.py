@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 
@@ -22,7 +22,7 @@ class GitHubAPIError(Exception):
 class GitHubClient:
     def __init__(
         self,
-        token: Optional[str],
+        token: str | None,
         session: httpx.AsyncClient,
         concurrency: int = 8,
     ) -> None:
@@ -30,7 +30,7 @@ class GitHubClient:
         self._session = session
         self._sem = asyncio.Semaphore(concurrency)
 
-    def _headers(self) -> Dict[str, str]:
+    def _headers(self) -> dict[str, str]:
         h = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
         if self._token:
             h["Authorization"] = f"Bearer {self._token}"
@@ -58,9 +58,12 @@ class GitHubClient:
 
             return resp.json()
 
-    async def get_repo_info(self, owner: str, repo: str) -> Dict[str, Any]:
+    async def get_repo_info(self, owner: str, repo: str) -> dict[str, Any]:
         """Return repository metadata dict from GitHub API."""
-        return await self._get(f"/repos/{owner}/{repo}")  # type: ignore[return-value]
+        data = await self._get(f"/repos/{owner}/{repo}")
+        if not isinstance(data, dict):
+            raise GitHubAPIError(502, f"Unexpected repository payload for {owner}/{repo}")
+        return data
 
     async def get_default_branch_sha(self, owner: str, repo: str, branch: str) -> str:
         """Return the HEAD commit SHA for the default branch."""
@@ -69,7 +72,7 @@ class GitHubClient:
             data = data[0]
         return str(data["object"]["sha"])
 
-    async def list_workflow_files(self, owner: str, repo: str, ref: str) -> List[Dict[str, Any]]:
+    async def list_workflow_files(self, owner: str, repo: str, ref: str) -> list[dict[str, Any]]:
         """List .yml/.yaml files in .github/workflows at the given ref."""
         try:
             items = await self._get(f"/repos/{owner}/{repo}/contents/.github/workflows?ref={ref}")

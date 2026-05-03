@@ -1,24 +1,29 @@
 [project]
 name = "insecure_tree"
 version = "0.1.0"
-description = "Find zizmor flaws in your dependency tree"
+description = "Audit GitHub Actions security posture of your Python dependency tree using zizmor"
 readme = "README.md"
 authors = [{ name = "Matthew Martin", email = "matthewdeanmartin@gmail.com" }]
-keywords = ["insecure_tree"]
+keywords = ["security", "supply-chain", "github-actions", "zizmor", "dependencies", "audit", "devsecops"]
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed",
 ]
 dependencies = [
     "pydantic>=2.0",
@@ -122,7 +127,7 @@ junit_family = "xunit1"
 
 [tool.black]
 line-length = 120
-target-version = ["py39"]
+target-version = ["py310"]
 include = '\.pyi?$'
 exclude = '''
 (
@@ -144,11 +149,11 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 120
-py_version = 39
+py_version = 310
 skip_gitignore = true
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 packages = ["insecure_tree", "tests"]
 
@@ -159,7 +164,7 @@ disallow_untyped_calls = false
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -173,7 +178,7 @@ select = [
 ]
 ignore = [
     "E501",   # line too long (black handles this)
-    "UP007",  # use X | Y for union (3.9 compat)
+    "UP007",  # keep traditional Union syntax
 ]
 
 [tool.ruff.lint.per-file-ignores]

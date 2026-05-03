@@ -7,7 +7,6 @@ import datetime
 import logging
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import httpx
 
@@ -39,8 +38,8 @@ from insecure_tree.scanners.zizmor import ScanInfraError, run_zizmor
 log = logging.getLogger(__name__)
 
 
-def _auto_detect_adapter(options: AdapterOptions, config: Config) -> BaseAdapter:
-    ordered: List[BaseAdapter] = [
+def _auto_detect_adapter(options: AdapterOptions, _config: Config) -> BaseAdapter:
+    ordered: list[BaseAdapter] = [
         UvAdapter(),
         UvPipAdapter(),
         PipInspectAdapter(),
@@ -55,7 +54,7 @@ def _auto_detect_adapter(options: AdapterOptions, config: Config) -> BaseAdapter
 
 
 def _choose_adapter(source: SourceAdapter, options: AdapterOptions, config: Config) -> BaseAdapter:
-    mapping: Dict[SourceAdapter, BaseAdapter] = {
+    mapping: dict[SourceAdapter, BaseAdapter] = {
         SourceAdapter.uv: UvAdapter(),
         SourceAdapter.uv_pip: UvPipAdapter(),
         SourceAdapter.pip_inspect: PipInspectAdapter(),
@@ -109,7 +108,7 @@ async def _fetch_and_scan(
     repo_ttl: int,
     tmp_dir: Path,
     config: Config,
-) -> Tuple[str, ScanResult]:
+) -> tuple[str, ScanResult]:
     repo_key = f"{owner}/{repo}"
 
     if config.no_clone:
@@ -145,7 +144,7 @@ async def _fetch_and_scan(
             cache=cache,
             timeout=120.0,
         )
-    except ScanInfraError as exc:
+    except ScanInfraError:
         raise  # Propagate missing zizmor as infrastructure error
     except Exception as exc:
         scan_result = ScanResult(status=ScanStatus.zizmor_failed, error_message=str(exc))
@@ -181,12 +180,12 @@ async def run_scan(config: Config) -> Report:
 
         # Step 2: Resolve package metadata + GitHub candidates
         meta_sem = asyncio.Semaphore(config.concurrency)
-        resolved_nodes: List[PackageNode] = await asyncio.gather(
+        resolved_nodes: list[PackageNode] = await asyncio.gather(
             *[_resolve_metadata(pkg, session, cache, config.metadata_ttl, meta_sem) for pkg in nodes]
         )
 
         # Apply config repo overrides
-        overridden: List[PackageNode] = []
+        overridden: list[PackageNode] = []
         for pkg in resolved_nodes:
             norm = pkg.normalized_name
             if norm in config.repo_overrides or pkg.name in config.repo_overrides:
@@ -209,7 +208,7 @@ async def run_scan(config: Config) -> Report:
         resolved_nodes = overridden
 
         # Step 3: Deduplicate repos
-        repo_to_packages: Dict[str, List[int]] = {}
+        repo_to_packages: dict[str, list[int]] = {}
         for i, pkg in enumerate(resolved_nodes):
             if pkg.selected_repo:
                 key = f"{pkg.selected_repo.owner}/{pkg.selected_repo.repo}"
@@ -221,7 +220,7 @@ async def run_scan(config: Config) -> Report:
                 tmp_path = Path(tmp)
                 gh_sem = asyncio.Semaphore(config.github_concurrency)
 
-                async def fetch_one(owner: str, repo: str) -> Tuple[str, ScanResult]:
+                async def fetch_one(owner: str, repo: str) -> tuple[str, ScanResult]:
                     async with gh_sem:
                         return await _fetch_and_scan(
                             owner, repo, gh_client, cache, config.repo_ttl, tmp_path, config
@@ -233,26 +232,28 @@ async def run_scan(config: Config) -> Report:
                     return_exceptions=True,
                 )
 
-                repo_results: Dict[str, ScanResult] = {}
-                for rk, result in zip(unique_repos, results):
+                repo_results: dict[str, ScanResult] = {}
+                for rk, result in zip(unique_repos, results, strict=False):
                     if isinstance(result, ScanInfraError):
                         raise result
                     if isinstance(result, Exception):
                         repo_results[rk] = ScanResult(status=ScanStatus.zizmor_failed, error_message=str(result))
-                    else:
-                        _, scan = result  # type: ignore[misc]
+                    elif isinstance(result, tuple):
+                        _, scan = result
                         repo_results[rk] = scan
+                    else:
+                        repo_results[rk] = ScanResult(status=ScanStatus.zizmor_failed, error_message=str(result))
         else:
             repo_results = {}
 
         # Step 6: Fan results back to packages
-        final_nodes: List[PackageNode] = []
-        for i, pkg in enumerate(resolved_nodes):
+        final_nodes: list[PackageNode] = []
+        for pkg in resolved_nodes:
             if pkg.selected_repo:
                 rk = f"{pkg.selected_repo.owner}/{pkg.selected_repo.repo}"
-                scan = repo_results.get(rk)
-                if scan:
-                    pkg = pkg.model_copy(update={"scan": scan})
+                repo_scan = repo_results.get(rk)
+                if repo_scan:
+                    pkg = pkg.model_copy(update={"scan": repo_scan})
                 else:
                     pkg = pkg.model_copy(update={"scan": ScanResult(status=ScanStatus.no_repo)})
             elif not config.offline:
@@ -280,14 +281,16 @@ async def run_scan(config: Config) -> Report:
     )
 
 
-def _build_summary(nodes: List[PackageNode]) -> ReportSummary:
+def _build_summary(nodes: list[PackageNode]) -> ReportSummary:
     with_github = sum(1 for n in nodes if n.selected_repo)
     scanned = sum(1 for n in nodes if n.scan and n.scan.status == ScanStatus.scanned)
     no_wf = sum(1 for n in nodes if n.scan and n.scan.status == ScanStatus.no_workflows)
     with_findings = sum(1 for n in nodes if n.scan and n.scan.finding_count > 0)
     skipped = sum(1 for n in nodes if n.scan and n.scan.status in (ScanStatus.skipped, ScanStatus.skipped_cached))
-    failed = sum(1 for n in nodes if n.scan and n.scan.status in (ScanStatus.github_api_failed, ScanStatus.zizmor_failed))
-    by_sev: Dict[str, int] = {}
+    failed = sum(
+        1 for n in nodes if n.scan and n.scan.status in (ScanStatus.github_api_failed, ScanStatus.zizmor_failed)
+    )
+    by_sev: dict[str, int] = {}
     for n in nodes:
         if n.scan:
             for sev, cnt in n.scan.findings_by_severity.items():
@@ -304,7 +307,7 @@ def _build_summary(nodes: List[PackageNode]) -> ReportSummary:
     )
 
 
-def _first_zizmor_version(nodes: List[PackageNode]) -> Optional[str]:
+def _first_zizmor_version(nodes: list[PackageNode]) -> str | None:
     for n in nodes:
         if n.scan and n.scan.zizmor_version:
             return n.scan.zizmor_version
@@ -318,29 +321,26 @@ def _check_threshold(summary: ReportSummary, fail_on: str) -> bool:
     if fail_on not in sev_order:
         return False
     threshold_idx = sev_order.index(fail_on)
-    for sev in sev_order[threshold_idx:]:
-        if summary.findings_by_severity.get(sev, 0) > 0:
-            return True
-    return False
+    return any(summary.findings_by_severity.get(sev, 0) > 0 for sev in sev_order[threshold_idx:])
 
 
-def _read_token(env_var: str) -> Optional[str]:
+def _read_token(env_var: str) -> str | None:
     import os
     return os.environ.get(env_var) or None
 
 
-class _NullCache(Cache):
+class _NullCache(Cache):  # pylint: disable=super-init-not-called
     """Cache that never stores anything."""
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # pylint: disable=super-init-not-called
         pass
 
-    def get(self, domain: str, key: str) -> Optional[str]:
+    def get(self, domain: str, key: str) -> str | None:
         return None
 
     def put(self, domain: str, key: str, value: str, ttl_seconds: int) -> None:
         pass
 
-    def get_json(self, domain: str, key: str) -> Optional[object]:
+    def get_json(self, domain: str, key: str) -> object | None:
         return None
 
     def put_json(self, domain: str, key: str, value: object, ttl_seconds: int) -> None:

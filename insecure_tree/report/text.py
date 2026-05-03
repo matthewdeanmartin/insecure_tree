@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
-from insecure_tree.models import PackageNode, Report, ScanStatus
+from insecure_tree.models import Report, ScanStatus
 
 _SEV_BADGE = {"error": "[error]", "warning": "[warn ]", "note": "[note ]"}
 
@@ -14,7 +13,7 @@ def _badge(sev: str) -> str:
     return _SEV_BADGE.get(sev, f"[{sev[:5]:<5}]")
 
 
-def _findings_summary(by_sev: dict) -> str:
+def _findings_summary(by_sev: dict[str, int]) -> str:
     parts = []
     for sev in ("error", "warning", "note"):
         count = by_sev.get(sev, 0)
@@ -25,7 +24,7 @@ def _findings_summary(by_sev: dict) -> str:
 
 def write_text(report: Report, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    lines: List[str] = []
+    lines: list[str] = []
 
     def h1(s: str) -> None:
         lines.append(s)
@@ -55,7 +54,7 @@ def write_text(report: Report, path: Path) -> None:
     lines.append("")
 
     # Top findings
-    top: List[tuple] = []
+    top: list[tuple[str, str, str, str, int, str]] = []
     for pkg in report.packages:
         if pkg.scan and pkg.scan.findings:
             repo = pkg.selected_repo
@@ -81,10 +80,7 @@ def write_text(report: Report, path: Path) -> None:
         scan = pkg.scan
         if scan:
             status = scan.status.value
-            if scan.finding_count:
-                findings_str = _findings_summary(scan.findings_by_severity)
-            else:
-                findings_str = "-"
+            findings_str = _findings_summary(scan.findings_by_severity) if scan.finding_count else "-"
         else:
             status = ScanStatus.no_repo.value
             findings_str = "-"

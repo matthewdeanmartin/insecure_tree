@@ -44,7 +44,7 @@ help:
 	@echo ""
 	@echo "  test                   Run pytest suite with coverage"
 	@echo "  test-ci                Run pytest -n auto (parallel, for CI)"
-	@echo "  tox                    Run tests across py39-py313 via tox-uv"
+	@echo "  tox                    Run tests across py310-py313 via tox-uv"
 	@echo "  smoke                  CLI smoke checks (--help, --version)"
 	@echo ""
 	@echo "  typecheck              Run mypy strict"
