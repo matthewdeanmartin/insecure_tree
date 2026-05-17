@@ -27,12 +27,14 @@ from insecure_tree.metadata.pypi import fetch_pypi_metadata
 from insecure_tree.models import (
     DependencyGraph,
     PackageNode,
+    PatternFinding,
     Report,
     ReportSummary,
     ScanResult,
     ScanStatus,
     SourceAdapter,
 )
+from insecure_tree.scanners.workflow_patterns import PatternMatch, detect_pwn_request
 from insecure_tree.scanners.zizmor import ScanInfraError, run_zizmor
 
 log = logging.getLogger(__name__)
@@ -134,6 +136,23 @@ async def _fetch_and_scan(
             error_message=fetch_result.error_message,
         )
 
+    # Pattern detection on raw workflow content (no zizmor needed)
+    wf_cache_key = f"{owner}/{repo}@{fetch_result.commit_sha}"
+    raw_workflows: list[dict[str, str]] = cache.get_json("github_workflows", wf_cache_key) or []
+    pattern_matches: list[PatternMatch] = detect_pwn_request(raw_workflows)
+    pattern_findings: list[PatternFinding] = [
+        PatternFinding(
+            rule_id=m.RULE_ID,
+            workflow_name=m.workflow_name,
+            workflow_path=m.workflow_path,
+            job_name=m.job_name,
+            step_index=m.step_index,
+            uses=m.uses,
+            message=m.message,
+        )
+        for m in pattern_matches
+    ]
+
     try:
         scan_result = await run_zizmor(
             fetch_result.workflow_dir,
@@ -149,6 +168,9 @@ async def _fetch_and_scan(
         raise  # Propagate missing zizmor as infrastructure error
     except Exception as exc:
         scan_result = ScanResult(status=ScanStatus.zizmor_failed, error_message=str(exc))
+
+    if pattern_findings:
+        scan_result = scan_result.model_copy(update={"pattern_findings": pattern_findings})
 
     return repo_key, scan_result
 
@@ -292,10 +314,12 @@ def _build_summary(nodes: list[PackageNode]) -> ReportSummary:
         1 for n in nodes if n.scan and n.scan.status in (ScanStatus.github_api_failed, ScanStatus.zizmor_failed)
     )
     by_sev: dict[str, int] = {}
+    pwn_count = 0
     for n in nodes:
         if n.scan:
             for sev, cnt in n.scan.findings_by_severity.items():
                 by_sev[sev] = by_sev.get(sev, 0) + cnt
+            pwn_count += len(n.scan.pattern_findings)
     return ReportSummary(
         total_packages=len(nodes),
         packages_with_github=with_github,
@@ -303,6 +327,7 @@ def _build_summary(nodes: list[PackageNode]) -> ReportSummary:
         repos_no_workflows=no_wf,
         repos_with_findings=with_findings,
         findings_by_severity=by_sev,
+        pwn_request_count=pwn_count,
         skipped=skipped,
         failed=failed,
     )

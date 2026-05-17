@@ -92,6 +92,20 @@ class ScanFinding(BaseModel):
     url: str = ""
 
 
+class PatternFinding(BaseModel):
+    """A dangerous trigger+action co-occurrence detected by insecure-tree itself."""
+
+    model_config = ConfigDict(frozen=True)
+
+    rule_id: str
+    workflow_name: str
+    workflow_path: str
+    job_name: str
+    step_index: int
+    uses: str
+    message: str
+
+
 class ScanResult(BaseModel):
     status: ScanStatus
     zizmor_version: str | None = None
@@ -100,6 +114,7 @@ class ScanResult(BaseModel):
     finding_count: int = 0
     findings_by_severity: dict[str, int] = Field(default_factory=dict)
     findings: list[ScanFinding] = Field(default_factory=list)
+    pattern_findings: list[PatternFinding] = Field(default_factory=list)
     raw_output_path: str | None = None
     error_message: str | None = None
 
@@ -146,6 +161,7 @@ class ReportSummary(BaseModel):
     repos_no_workflows: int = 0
     repos_with_findings: int = 0
     findings_by_severity: dict[str, int] = Field(default_factory=dict)
+    pwn_request_count: int = 0
     skipped: int = 0
     failed: int = 0
 

@@ -1,6 +1,6 @@
 [project]
 name = "insecure_tree"
-version = "0.2.0"
+version = "0.3.0"
 description = "Audit GitHub Actions security posture of your Python dependency tree using zizmor"
 readme = "README.md"
 authors = [{ name = "Matthew Martin", email = "matthewdeanmartin@gmail.com" }]
@@ -32,7 +32,9 @@ dependencies = [
     "jinja2>=3.1",
     "rich>=13.0",
     "tomli>=2.0; python_version < '3.11'",
+    "pyyaml>=6.0",
     "zizmor>=1.0",
+    "prompt-toolkit>=3.0",
 ]
 
 [project.urls]

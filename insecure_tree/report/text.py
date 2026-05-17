@@ -51,6 +51,8 @@ def write_text(report: Report, path: Path) -> None:
     lines.append(f"{'No workflows:':<35}{s.repos_no_workflows:>5}")
     lines.append(f"{'Repos with findings:':<35}{s.repos_with_findings:>5}")
     lines.append(f"{'Findings:':<35}  {_findings_summary(s.findings_by_severity)}")
+    if s.pwn_request_count:
+        lines.append(f"{'[!] pwn-request patterns:':<35}{s.pwn_request_count:>5}")
     lines.append("")
 
     # Top findings
@@ -101,6 +103,24 @@ def write_text(report: Report, path: Path) -> None:
         for pkg in failed:
             err = pkg.scan.error_message if pkg.scan else ""
             lines.append(f"  {pkg.name}=={pkg.version}: {pkg.scan.status.value if pkg.scan else '?'} {err}")
+        lines.append("")
+
+    # pwn-request pattern findings
+    pwn_pkgs = [p for p in report.packages if p.scan and p.scan.pattern_findings]
+    if pwn_pkgs:
+        h2("pwn-request patterns (pull_request_target + actions/checkout)")
+        lines.append(
+            "  These workflows trigger on pull_request_target AND call actions/checkout,\n"
+            "  allowing untrusted PR code to run with base-repo write permissions.\n"
+            "  See: https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/\n"
+        )
+        for pkg in pwn_pkgs:
+            repo = pkg.selected_repo
+            repo_str = f"{repo.owner}/{repo.repo}" if repo else "?"
+            lines.append(f"\n{pkg.name}=={pkg.version} ({repo_str})")
+            for pf in pkg.scan.pattern_findings:  # type: ignore[union-attr]
+                lines.append(f"  [pwn-request] {pf.workflow_path}  job={pf.job_name}  step={pf.step_index + 1}")
+                lines.append(f"    uses: {pf.uses}")
         lines.append("")
 
     # Full findings

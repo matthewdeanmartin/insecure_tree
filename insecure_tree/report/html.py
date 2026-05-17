@@ -40,6 +40,8 @@ _TEMPLATE = """<!DOCTYPE html>
   .filter-bar label { margin-right: 12px; }
   a { color: #2563eb; }
   code { font-size: 0.9em; background: #f3f4f6; padding: 1px 4px; border-radius: 3px; }
+  .pwn-request { background: #fff7ed; border-left: 4px solid #ea580c; padding: 10px 14px; margin: 8px 0; border-radius: 4px; }
+  .pwn-request .pwn-title { font-weight: bold; color: #9a3412; }
 </style>
 </head>
 <body>
@@ -60,7 +62,35 @@ _TEMPLATE = """<!DOCTYPE html>
   <div class="card"><div class="num">{{ report.summary.repos_with_findings }}</div><div class="label">with findings</div></div>
   <div class="card" style="background:#fef2f2"><div class="num" style="color:#991b1b">{{ report.summary.findings_by_severity.get('error', 0) }}</div><div class="label">errors</div></div>
   <div class="card" style="background:#fffbeb"><div class="num" style="color:#92400e">{{ report.summary.findings_by_severity.get('warning', 0) }}</div><div class="label">warnings</div></div>
+  {% if report.summary.pwn_request_count %}
+  <div class="card" style="background:#fff7ed"><div class="num" style="color:#9a3412">{{ report.summary.pwn_request_count }}</div><div class="label">pwn-request</div></div>
+  {% endif %}
 </div>
+
+{% set pwn_pkgs = report.packages | selectattr('scan') | selectattr('scan.pattern_findings') | list %}
+{% if pwn_pkgs %}
+<h2 style="color:#9a3412">pwn-request patterns</h2>
+<p>
+  These workflows trigger on <code>pull_request_target</code> <em>and</em> call <code>actions/checkout</code>,
+  which allows untrusted PR code to run with base-repo write permissions
+  (<a href="https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/" target="_blank">pwn-request / GHSL-2021-041 class</a>).
+</p>
+{% for pkg in pwn_pkgs %}
+{% set repo = pkg.selected_repo %}
+<div class="pwn-request">
+  <div class="pwn-title">{{ pkg.name }}=={{ pkg.version }}
+    {% if repo %}&nbsp;&mdash;&nbsp;<a href="https://github.com/{{ repo.owner }}/{{ repo.repo }}" target="_blank">{{ repo.owner }}/{{ repo.repo }}</a>{% endif %}
+  </div>
+  {% for pf in pkg.scan.pattern_findings %}
+  <div style="margin-top:6px">
+    <code>{{ pf.workflow_path }}</code> &rarr; job <strong>{{ pf.job_name }}</strong>, step {{ pf.step_index + 1 }}<br>
+    <code>uses: {{ pf.uses }}</code><br>
+    <small>{{ pf.message }}</small>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endif %}
 
 <h2>Packages</h2>
 <div class="filter-bar">
@@ -116,6 +146,9 @@ _TEMPLATE = """<!DOCTYPE html>
     {% else %}-{% endif %}
   </td>
   <td>
+    {% if scan and scan.pattern_findings %}
+      <span style="background:#fff7ed;color:#9a3412;border-radius:4px;padding:1px 6px;font-size:0.8em;font-weight:bold">{{ scan.pattern_findings | length }} pwn-request</span>
+    {% endif %}
     {% if scan and scan.findings %}
     <details>
       <summary>
@@ -132,9 +165,9 @@ _TEMPLATE = """<!DOCTYPE html>
       </div>
       {% endfor %}
     </details>
-    {% elif scan and scan.status.value == 'scanned' %}
+    {% elif scan and scan.status.value == 'scanned' and not scan.pattern_findings %}
       <span class="badge-ok">clean</span>
-    {% else %}-{% endif %}
+    {% elif not scan or not scan.pattern_findings %}-{% endif %}
   </td>
 </tr>
 {% endfor %}
