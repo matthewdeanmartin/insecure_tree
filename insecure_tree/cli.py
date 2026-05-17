@@ -27,6 +27,43 @@ def _setup_logging(verbose: bool) -> None:
     logging.basicConfig(level=level, format="%(levelname)s: %(message)s")
 
 
+def _is_interactive() -> bool:
+    """Return True only when both stdin and stdout are real TTYs."""
+    try:
+        return sys.stdin.isatty() and sys.stdout.isatty()
+    except Exception:
+        return False
+
+
+def _prompt(message: str, default: str = "", password: bool = False) -> str:
+    """Prompt interactively via prompt_toolkit when on a TTY, else return default."""
+    if not _is_interactive():
+        return default
+    try:
+        from prompt_toolkit import prompt as pt_prompt
+
+        result = pt_prompt(message, is_password=password, default=default)
+        return result.strip()
+    except Exception:
+        return default
+
+
+def _prompt_choices(message: str, choices: list[str], default: str) -> str:
+    """Prompt with tab-completion for a fixed set of choices."""
+    if not _is_interactive():
+        return default
+    try:
+        from prompt_toolkit import prompt as pt_prompt
+        from prompt_toolkit.completion import WordCompleter
+
+        completer = WordCompleter(choices, ignore_case=True)
+        result = pt_prompt(message, completer=completer, default=default)
+        result = result.strip()
+        return result if result in choices else default
+    except Exception:
+        return default
+
+
 # ---------------------------------------------------------------------------
 # Subcommand: scan
 # ---------------------------------------------------------------------------
@@ -163,6 +200,26 @@ def _build_config(args: argparse.Namespace) -> Config:
     return config
 
 
+def _interactive_fill_scan_args(args: argparse.Namespace) -> None:
+    """Prompt for commonly-missing scan arguments when running interactively."""
+    if not sys.stdin.isatty():
+        return
+
+    # GitHub token
+    token_env = getattr(args, "github_token_env", "GITHUB_TOKEN")
+    if not getattr(args, "github_token", None) and not os.environ.get(token_env):
+        token = _prompt("GitHub token (leave blank to skip private repos): ", password=True)
+        if token:
+            args.github_token = token
+
+    # Project path (only prompt if explicitly "." and a uv.lock/pyproject doesn't exist there)
+    project = Path(getattr(args, "project", ".")).resolve()
+    if not (project / "uv.lock").exists() and not (project / "pyproject.toml").exists():
+        given = _prompt(f"Project path [{project}]: ", default=str(project))
+        if given:
+            args.project = given
+
+
 def cmd_scan(args: argparse.Namespace) -> int:
     from insecure_tree.models import ReportFormat
     from insecure_tree.pipeline import run_scan
@@ -171,6 +228,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
     from insecure_tree.report.text import write_text
     from insecure_tree.scanners.zizmor import ScanInfraError
 
+    _interactive_fill_scan_args(args)
     config = _build_config(args)
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
