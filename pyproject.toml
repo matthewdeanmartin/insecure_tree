@@ -116,6 +116,7 @@ dev = [
 
 [tool.uv]
 default-groups = ["dev"]
+universal = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
