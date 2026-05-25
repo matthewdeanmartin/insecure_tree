@@ -68,3 +68,7 @@ docs/_build/
 *.swo
 *~
 .DS_Store
+/.tmp-pages-test/
+/artifacts/
+/insecure-tree-forest-report/
+/insecure-tree-report/
