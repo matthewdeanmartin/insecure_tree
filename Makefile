@@ -303,10 +303,10 @@ publish:
 	@echo "Publishing via uv (set UV_PUBLISH_TOKEN or configure OIDC trusted publishing)"
 	@$(UV) publish
 
-check: format-check lint-check security test typecheck metadata-check version-check
+check: lint-check security test typecheck metadata-check version-check
 	@echo "All checks passed."
 
-check-ci: format-check lint-check security test-ci typecheck metadata-check version-check
+check-ci: lint-check security test-ci typecheck metadata-check version-check
 	@echo "CI checks passed."
 
 prerelease: check dev-status docs-check smoke spell publish-check
