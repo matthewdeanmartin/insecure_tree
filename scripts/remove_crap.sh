@@ -41,7 +41,9 @@ fi
 # --- 1. Ensure git-filter-repo is available ---------------------------------
 if ! git filter-repo --version >/dev/null 2>&1; then
   echo ">> git-filter-repo not found; installing via pip..."
-  python -m pip install --user git-filter-repo
+  # No --user: it conflicts with active virtualenvs. Installs into whatever
+  # environment 'python' resolves to (venv if active, else user/system).
+  python -m pip install git-filter-repo
   # filter-repo installs as a git subcommand if on PATH; verify.
   if ! git filter-repo --version >/dev/null 2>&1; then
     echo "ERROR: git-filter-repo installed but 'git filter-repo' still not found." >&2
