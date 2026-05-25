@@ -116,8 +116,9 @@ dev = [
 
 [tool.uv]
 default-groups = ["dev"]
-universal = true
 
+[tool.uv.pip]
+universal = true
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
