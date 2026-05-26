@@ -297,7 +297,11 @@ def _packages_via_uv(python: Path, timeout: float) -> list[tuple[str, str, str]]
     if not isinstance(raw, list):
         return None
 
-    return [(item["name"], item["version"], canonicalize(item["name"])) for item in raw if item.get("name") and item.get("version")]
+    return [
+        (item["name"], item["version"], canonicalize(item["name"]))
+        for item in raw
+        if item.get("name") and item.get("version")
+    ]
 
 
 def _packages_via_pip_inspect(python: Path, timeout: float) -> list[tuple[str, str, str]]:

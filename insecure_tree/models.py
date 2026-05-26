@@ -36,6 +36,7 @@ class SourceAdapter(str, Enum):
     requirements = "requirements"
     json = "json"
     auto = "auto"
+    forest = "forest"
 
 
 class ReportFormat(str, Enum):

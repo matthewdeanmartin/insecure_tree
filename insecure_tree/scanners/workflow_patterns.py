@@ -107,7 +107,7 @@ def detect_pwn_request(
         if not data or not isinstance(data, dict):
             continue
 
-        on_value = data.get("on") or data.get(True)  # YAML 'on' may parse as True
+        on_value = data.get("on") or data.get(True)  # type: ignore[call-overload]  # YAML 'on' may parse as True
         if not _has_pull_request_target(on_value):
             continue
 
