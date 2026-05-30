@@ -105,23 +105,31 @@ expires = "2026-12-01"
 
 ## Documentation
 
-Full documentation is at [insecure-tree.readthedocs.io](https://insecure_tree.readthedocs.io/en/latest/).
+Full documentation is at [insecure-tree.readthedocs.io](https://insecure-tree.readthedocs.io/en/latest/).
 
-- [Installation](https://insecure_tree.readthedocs.io/en/latest/installation/)
-- [Quick Start](https://insecure_tree.readthedocs.io/en/latest/usage/quickstart/)
-- [CLI Reference](https://insecure_tree.readthedocs.io/en/latest/usage/cli/)
-- [Configuration](https://insecure_tree.readthedocs.io/en/latest/usage/configuration/)
-- [How It Works](https://insecure_tree.readthedocs.io/en/latest/concepts/how_it_works/)
-- [CI Integration](https://insecure_tree.readthedocs.io/en/latest/usage/ci/)
+- [Installation](https://insecure-tree.readthedocs.io/en/latest/installation/)
+- [Quick Start](https://insecure-tree.readthedocs.io/en/latest/usage/quickstart/)
+- [CLI Reference](https://insecure-tree.readthedocs.io/en/latest/usage/cli/)
+- [Configuration](https://insecure-tree.readthedocs.io/en/latest/usage/configuration/)
+- [How It Works](https://insecure-tree.readthedocs.io/en/latest/concepts/how_it_works/)
+- [CI Integration](https://insecure-tree.readthedocs.io/en/latest/usage/ci/)
 
 ## Contributing
 
-See [CONTRIBUTING.md](docs/extending/CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/matthewdeanmartin/insecure_tree/blob/main/docs/extending/CONTRIBUTING.md).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/matthewdeanmartin/insecure_tree/blob/main/LICENSE).
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/matthewdeanmartin/insecure_tree/blob/main/CHANGELOG.md).
+
+## Project Links
+
+- [GitHub](https://github.com/matthewdeanmartin/insecure_tree)
+- [PyPI](https://pypi.org/project/insecure-tree/)
+- [Documentation](https://insecure-tree.readthedocs.io/en/latest/)
+- [Bug Tracker](https://github.com/matthewdeanmartin/insecure_tree/issues)
+- [Change Log](https://github.com/matthewdeanmartin/insecure_tree/blob/main/CHANGELOG.md)
