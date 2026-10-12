@@ -1,6 +1,6 @@
 [MASTER]
 jobs=1
-py-version=3.10
+py-version=3.11
 
 [MESSAGES CONTROL]
 disable=

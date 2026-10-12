@@ -291,7 +291,7 @@ async def run_scan(config: Config) -> Report:
     return Report(
         project_path=str(project_path),
         source_adapter=graph.source.value,
-        scan_timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        scan_timestamp=datetime.datetime.now(datetime.UTC).isoformat(),
         insecure_tree_version=__version__,
         zizmor_version=zizmor_ver,
         summary=summary,

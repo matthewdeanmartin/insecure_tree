@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from typing import Any
 
+import tomllib
 from pydantic import BaseModel, Field
 
 from insecure_tree.models import (
@@ -16,11 +16,6 @@ from insecure_tree.models import (
     SourceAdapter,
     ZizmorphConfig,
 )
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 class Config(BaseModel):
