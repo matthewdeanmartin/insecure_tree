@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import httpx
+import httpx2
 
 from insecure_tree.__about__ import __version__
 
@@ -332,7 +332,7 @@ def cmd_metadata(args: argparse.Namespace) -> int:
 
     async def _run() -> None:
         cache = Cache()
-        async with httpx.AsyncClient(timeout=30) as session:
+        async with httpx2.AsyncClient(timeout=30) as session:
             meta = await fetch_pypi_metadata(package, version, session=session, cache=cache, ttl=3600)
         if meta is None:
             print(f"No metadata found for {package}", file=sys.stderr)

@@ -133,3 +133,14 @@ See [CHANGELOG.md](https://github.com/matthewdeanmartin/insecure_tree/blob/main/
 - [Documentation](https://insecure-tree.readthedocs.io/en/latest/)
 - [Bug Tracker](https://github.com/matthewdeanmartin/insecure_tree/issues)
 - [Change Log](https://github.com/matthewdeanmartin/insecure_tree/blob/main/CHANGELOG.md)
+
+## Python 3.15 wheel verification — 2026-10-04
+
+See the subsequent HTTPX2 verification below; it supersedes the earlier HTTPX bound.
+
+
+## HTTPX2 verification (2026-10-04)
+
+Direct async clients now use HTTPX2; all 68 tests and installed-wheel startup pass on 3.14.7. Complete RC3 stable/pre installation remains blocked by mandatory PyYAML wheels. This supersedes the earlier HTTPX <1 workaround; it does not establish full RC3 support.
+
+Dependency installs require published wheels; no native builds or GitHub jobs. Experimental mode allows prereleases but the successful HTTPX2 test environments selected stable packages. Locks were upgraded with `uv lock --upgrade`. Changes are local; human operators decide publishing and upstream reports.

@@ -96,7 +96,7 @@ def test_github_url_in_description() -> None:
 
 
 def test_repository_label_high_confidence() -> None:
-    meta = _meta(project_urls={"Repository": "https://github.com/encode/httpx"})
+    meta = _meta(project_urls={"Repository": "https://github.com/encode/httpx2"})
     candidates = extract_github_candidates(meta)
     assert candidates[0].confidence == ConfidenceLevel.high
 

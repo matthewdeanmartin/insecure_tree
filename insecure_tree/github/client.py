@@ -6,7 +6,7 @@ import asyncio
 import logging
 from typing import Any
 
-import httpx
+import httpx2
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class GitHubClient:
     def __init__(
         self,
         token: str | None,
-        session: httpx.AsyncClient,
+        session: httpx2.AsyncClient,
         concurrency: int = 8,
     ) -> None:
         self._token = token

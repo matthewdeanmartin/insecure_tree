@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import httpx
+import httpx2
 
 from insecure_tree.cache import Cache
 from insecure_tree.models import PackageMetadata
@@ -48,7 +48,7 @@ async def fetch_pypi_metadata(
     name: str,
     version: str | None,
     *,
-    session: httpx.AsyncClient,
+    session: httpx2.AsyncClient,
     cache: Cache,
     ttl: int,
 ) -> PackageMetadata | None:

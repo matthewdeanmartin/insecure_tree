@@ -8,7 +8,7 @@ import logging
 import tempfile
 from pathlib import Path
 
-import httpx
+import httpx2
 
 from insecure_tree.__about__ import __version__
 from insecure_tree.adapters.base import AdapterOptions, BaseAdapter
@@ -73,7 +73,7 @@ def _choose_adapter(source: SourceAdapter, options: AdapterOptions, config: Conf
 
 async def _resolve_metadata(
     pkg: PackageNode,
-    session: httpx.AsyncClient,
+    session: httpx2.AsyncClient,
     cache: Cache,
     meta_ttl: int,
     sem: asyncio.Semaphore,
@@ -198,7 +198,7 @@ async def run_scan(config: Config) -> Report:
     cache = Cache() if not config.no_cache else _NullCache()
     token = config.github.token or _read_token(config.github.token_env)
 
-    async with httpx.AsyncClient(timeout=config.timeout) as session:
+    async with httpx2.AsyncClient(timeout=config.timeout) as session:
         gh_client = GitHubClient(token, session, config.github_concurrency)
 
         # Step 2: Resolve package metadata + GitHub candidates
