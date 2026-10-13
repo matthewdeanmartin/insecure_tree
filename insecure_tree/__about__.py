@@ -14,20 +14,21 @@ __all__ = [
 ]
 
 __title__ = "insecure_tree"
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __description__ = "Audit GitHub Actions security posture of your Python dependency tree using zizmor"
 __readme__ = "README.md"
 __credits__ = [{"name": "Matthew Martin", "email": "matthewdeanmartin@gmail.com"}]
 __keywords__ = ["security", "supply-chain", "github-actions", "zizmor", "dependencies", "audit", "devsecops"]
 __license__ = "MIT"
-__requires_python__ = ">=3.10"
-__status__ = "3 - Alpha"
+__requires_python__ = ">=3.11"
+__status__ = "1 - Planning"
 __dependencies__ = [
     "pydantic>=2.0",
     "packaging>=23.0",
     "httpx2>=2.0,<3",
     "jinja2>=3.1",
     "rich>=13.0",
-    "tomli>=2.0; python_version < '3.11'",
+    "pyyaml>=6.0",
     "zizmor>=1.0",
+    "prompt-toolkit>=3.0",
 ]
